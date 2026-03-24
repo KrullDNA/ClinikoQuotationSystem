@@ -107,10 +107,11 @@ class PDFGenerator {
       });
     }
 
-    // Build business footer
-    const business = quoteData.business || {};
-    const businessAddress = this._buildBusinessAddress(business);
-    const businessContact = this._buildBusinessContact(business);
+    // Build business footer from config settings
+    const cfg = config.getConfig();
+    const footerAddress = cfg.footer_address || '';
+    const footerEmail = cfg.footer_email || '';
+    const footerWebsite = cfg.footer_website || '';
 
     // Build line items HTML
     const lineItemsHtml = lineItems.map(item => {
@@ -180,11 +181,14 @@ class PDFGenerator {
       : '';
 
     // Footer — EMPTY FIELD RULE
-    const footerAddressHtml = businessAddress
-      ? `<div class="footer-line">${this._esc(businessAddress)}</div>`
+    const footerAddressHtml = footerAddress
+      ? `<div class="footer-line">${this._esc(footerAddress)}</div>`
       : '';
-    const footerContactHtml = businessContact
-      ? `<div class="footer-line">${this._esc(businessContact)}</div>`
+    const contactParts = [];
+    if (footerEmail) contactParts.push(`E: ${this._esc(footerEmail)}`);
+    if (footerWebsite) contactParts.push(`W: ${this._esc(footerWebsite)}`);
+    const footerContactHtml = contactParts.length > 0
+      ? `<div class="footer-line">${contactParts.join(' | ')}</div>`
       : '';
 
     // Logo
@@ -415,7 +419,6 @@ body {
     </div>
     ${footerAddressHtml}
     ${footerContactHtml}
-    <div class="footer-line">E: info@feetinfocus.com.au | W: feetinfocus.com.au</div>
   </div>
 </div>
 </body>
@@ -433,35 +436,6 @@ body {
     } catch (e) {
       return '';
     }
-  }
-
-  _buildBusinessAddress(business) {
-    if (!business || !business.address) return '';
-    const addr = business.address;
-    const parts = [];
-    if (addr.address_1) parts.push(addr.address_1);
-    if (addr.address_2) parts.push(addr.address_2);
-    if (addr.city) parts.push(addr.city);
-    if (addr.state) parts.push(addr.state);
-    if (addr.post_code) parts.push(addr.post_code);
-    return parts.join(', ');
-  }
-
-  _buildBusinessContact(business) {
-    if (!business) return '';
-    const parts = [];
-    if (business.contact_information) {
-      const ci = business.contact_information;
-      if (ci.phone) parts.push(`T: ${ci.phone}`);
-      if (ci.fax) parts.push(`F: ${ci.fax}`);
-    }
-    if (parts.length === 0 && business.phone_numbers) {
-      const phones = business.phone_numbers;
-      if (Array.isArray(phones) && phones.length > 0) {
-        parts.push(`T: ${phones[0].number || phones[0]}`);
-      }
-    }
-    return parts.join(' | ');
   }
 
   _formatCurrency(amount) {

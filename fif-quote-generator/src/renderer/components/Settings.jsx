@@ -140,6 +140,11 @@ export default function Settings({ onBack, isFirstTime }) {
   const [defaultTerms, setDefaultTerms] = useState('');
   const [logoData, setLogoData] = useState(null);
 
+  // Footer / Company Details
+  const [footerAddress, setFooterAddress] = useState('');
+  const [footerEmail, setFooterEmail] = useState('');
+  const [footerWebsite, setFooterWebsite] = useState('');
+
   // Change PIN
   const [showChangePin, setShowChangePin] = useState(false);
   const [currentPin, setCurrentPin] = useState('');
@@ -168,6 +173,9 @@ export default function Settings({ onBack, isFirstTime }) {
         setSelectedBusiness(cfg.default_business_id || '');
         setDefaultValidity(cfg.default_validity || '30 days');
         setDefaultTerms(cfg.default_terms || '');
+        setFooterAddress(cfg.footer_address || '');
+        setFooterEmail(cfg.footer_email || '');
+        setFooterWebsite(cfg.footer_website || '');
       }
 
       const hasKey = await window.api.hasApiKey();
@@ -276,7 +284,10 @@ export default function Settings({ onBack, isFirstTime }) {
         shard,
         default_business_id: selectedBusiness,
         default_validity: defaultValidity,
-        default_terms: defaultTerms
+        default_terms: defaultTerms,
+        footer_address: footerAddress,
+        footer_email: footerEmail,
+        footer_website: footerWebsite
       });
 
       setSaveStatus('success');
@@ -523,6 +534,49 @@ export default function Settings({ onBack, isFirstTime }) {
               className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm resize-y
                          focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
             />
+          </div>
+        </section>
+
+        {/* Company / Footer Details */}
+        <section className="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+          <h3 className="text-base font-semibold text-slate-800 mb-1">Company Details (PDF Footer)</h3>
+          <p className="text-xs text-slate-400 mb-4">These details appear at the bottom of every quote PDF.</p>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-slate-700 mb-1">Address</label>
+            <input
+              type="text"
+              value={footerAddress}
+              onChange={(e) => setFooterAddress(e.target.value)}
+              placeholder="e.g. 123 Smith St, Melbourne VIC 3000"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm
+                         focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+              <input
+                type="email"
+                value={footerEmail}
+                onChange={(e) => setFooterEmail(e.target.value)}
+                placeholder="e.g. info@example.com.au"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm
+                           focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Website</label>
+              <input
+                type="text"
+                value={footerWebsite}
+                onChange={(e) => setFooterWebsite(e.target.value)}
+                placeholder="e.g. feetinfocus.com.au"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm
+                           focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+              />
+            </div>
           </div>
         </section>
 
