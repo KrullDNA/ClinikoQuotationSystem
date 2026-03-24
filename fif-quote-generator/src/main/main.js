@@ -270,9 +270,10 @@ ipcMain.handle('upload-step1-presigned', async () => {
     const presigned = await clinikoAPI.getPresignedPost();
     return { success: true, data: presigned };
   } catch (error) {
+    const msg = error.message || 'Unknown error';
     return {
       success: false,
-      error: 'Could not connect to Cliniko. Please check your internet connection and try again.'
+      error: `Upload failed: ${msg}`
     };
   }
 });
