@@ -518,8 +518,9 @@ ipcMain.handle('get-logo-data', async () => {
       return { success: true, data: null };
     }
     const data = fs.readFileSync(logoPath);
-    const ext = path.extname(logoPath).replace('.', '');
-    const mime = ext === 'png' ? 'image/png' : 'image/jpeg';
+    const ext = path.extname(logoPath).replace('.', '').toLowerCase();
+    const mimeMap = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', svg: 'image/svg+xml' };
+    const mime = mimeMap[ext] || 'image/png';
     const dataUrl = `data:${mime};base64,${data.toString('base64')}`;
     return { success: true, data: dataUrl };
   } catch (error) {
