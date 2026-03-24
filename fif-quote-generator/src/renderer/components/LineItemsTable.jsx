@@ -43,10 +43,17 @@ function LineItemRow({ item, index, onChange, onDelete, onDragStart, onDragOver,
         </svg>
       </td>
 
-      {/* Item Code + Category */}
+      {/* Item Code + Category (editable) */}
       <td className="py-2 px-2 align-top">
-        <div className="text-sm font-mono text-slate-700">{item.itemCode || '\u2014'}</div>
-        <div className="text-xs text-slate-400">{item.category || ''}</div>
+        <input
+          type="text"
+          value={item.itemCode || ''}
+          onChange={(e) => update('itemCode', e.target.value)}
+          placeholder="Item code"
+          className="w-full px-2 py-1 text-sm font-mono border border-slate-200 rounded
+                     focus:outline-none focus:ring-1 focus:ring-brand-500 focus:border-brand-500"
+        />
+        <div className="text-xs text-slate-400 mt-0.5">{item.category || ''}</div>
       </td>
 
       {/* Description (editable) */}
@@ -64,9 +71,10 @@ function LineItemRow({ item, index, onChange, onDelete, onDragStart, onDragOver,
       <td className="py-2 px-2 align-top w-20">
         <input
           type="number"
-          min="1"
+          min="0.01"
+          step="0.01"
           value={qty}
-          onChange={(e) => update('qty', Math.max(1, parseInt(e.target.value) || 1))}
+          onChange={(e) => update('qty', Math.max(0.01, parseFloat(e.target.value) || 1))}
           className="w-full px-2 py-1 text-sm text-center border border-slate-200 rounded
                      focus:outline-none focus:ring-1 focus:ring-brand-500 focus:border-brand-500"
         />
