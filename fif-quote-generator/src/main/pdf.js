@@ -138,7 +138,7 @@ class PDFGenerator {
     // ── Build participant info rows (EMPTY FIELD RULE) ──
     let participantHtml = '';
     if (participantName) {
-      participantHtml += `<div class="info-row"><span class="info-label">Participant Name: </span><span class="info-value">${this._esc(participantName)}</span></div>`;
+      participantHtml += `<div class="info-row"><span class="info-label">Client Name:</span><span class="info-value">${this._esc(participantName)}</span></div>`;
     }
     if (fundingLabel && fundingValue) {
       participantHtml += `<div class="info-row"><span class="info-label">${this._esc(fundingLabel)}: </span><span class="info-value">${this._esc(fundingValue)}</span></div>`;
