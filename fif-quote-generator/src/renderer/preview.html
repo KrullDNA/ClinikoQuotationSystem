@@ -323,7 +323,7 @@
 
       // Step 1: Get presigned URL
       setStepState(1, 'active');
-      const step1 = await window.previewApi.uploadStep1Presigned();
+      const step1 = await window.previewApi.uploadStep1Presigned(previewData.patientId);
       if (!step1.success) {
         setStepState(1, 'error');
         showUploadError(step1.error);

@@ -265,9 +265,9 @@ ipcMain.handle('close-preview', async (event) => {
 });
 
 // Upload to Cliniko — Step 1: Get presigned post URL
-ipcMain.handle('upload-step1-presigned', async () => {
+ipcMain.handle('upload-step1-presigned', async (_event, patientId) => {
   try {
-    const presigned = await clinikoAPI.getPresignedPost();
+    const presigned = await clinikoAPI.getPresignedPost(patientId);
     return { success: true, data: presigned };
   } catch (error) {
     const msg = error.message || 'Unknown error';

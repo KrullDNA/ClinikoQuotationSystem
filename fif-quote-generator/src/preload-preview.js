@@ -8,8 +8,8 @@ contextBridge.exposeInMainWorld('previewApi', {
     ipcRenderer.invoke('get-preview-data'),
 
   // 3-step upload flow
-  uploadStep1Presigned: () =>
-    ipcRenderer.invoke('upload-step1-presigned'),
+  uploadStep1Presigned: (patientId) =>
+    ipcRenderer.invoke('upload-step1-presigned', patientId),
 
   uploadStep2S3: (presigned, filePath, quoteNumber) =>
     ipcRenderer.invoke('upload-step2-s3', presigned, filePath, quoteNumber),
