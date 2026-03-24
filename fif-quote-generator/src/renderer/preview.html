@@ -257,9 +257,9 @@
         document.getElementById('toolbar-title').textContent =
           'Quote Preview \u2014 ' + (previewData.quoteNumber || 'Quote');
 
-        // Embed PDF
+        // Embed PDF (hide built-in toolbar so users use our Save/Print buttons)
         document.getElementById('pdf-frame').src =
-          'data:application/pdf;base64,' + previewData.pdfBase64;
+          'data:application/pdf;base64,' + previewData.pdfBase64 + '#toolbar=0';
 
         document.getElementById('loading').style.display = 'none';
         document.getElementById('pdf-viewer').style.display = 'flex';
