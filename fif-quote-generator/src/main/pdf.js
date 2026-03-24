@@ -118,16 +118,13 @@ class PDFGenerator {
     // Build line items HTML
     const lineItemsHtml = lineItems.map(item => {
       const itemCodeHtml = item.itemCode
-        ? `<div class="item-code">${this._esc(item.itemCode)}</div>`
-        : '';
-      const categoryHtml = item.category
-        ? `<div class="item-category">${this._esc(item.category)}</div>`
+        ? `<div class="item-code">${this._escBold(item.itemCode)}</div>`
         : '';
 
       return `
           <tr>
-            <td class="col-item">${itemCodeHtml}${categoryHtml}</td>
-            <td class="col-description"><div class="desc-text">${this._esc(item.description)}</div></td>
+            <td class="col-item">${itemCodeHtml}</td>
+            <td class="col-description"><div class="desc-text">${this._escBold(item.description)}</div></td>
             <td class="col-qty">${item.qty}</td>
             <td class="col-unit-cost">$ ${item.unitCostFormatted}</td>
             <td class="col-gst">${item.gstFormatted}</td>
@@ -138,7 +135,14 @@ class PDFGenerator {
     // ── Build participant info rows (EMPTY FIELD RULE) ──
     let participantHtml = '';
     if (participantName) {
-      participantHtml += `<div class="info-row"><span class="info-label">Participant Name: </span><span class="info-value">${this._esc(participantName)}</span></div>`;
+      participantHtml += `<div class="info-row"><span class="info-label">Client Name: </span><span class="info-value">${this._esc(participantName)}</span></div>`;
+    }
+    if (patient.dateOfBirth) {
+      participantHtml += `<div class="info-row"><span class="info-label">Date of Birth: </span><span class="info-value">${this._esc(patient.dateOfBirth)}</span></div>`;
+    }
+    const addressLines = patient.addressLines;
+    if (addressLines && addressLines.length > 0) {
+      participantHtml += `<div class="info-row"><span class="info-label">Address: </span><span class="info-value">${addressLines.map(l => this._esc(l)).join(', ')}</span></div>`;
     }
     if (fundingLabel && fundingValue) {
       participantHtml += `<div class="info-row"><span class="info-label">${this._esc(fundingLabel)}: </span><span class="info-value">${this._esc(fundingValue)}</span></div>`;
@@ -464,6 +468,16 @@ body {
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;')
       .replace(/\n/g, '<br>');
+  }
+
+  /**
+   * Escape HTML but preserve **bold** markdown syntax.
+   * Wrap text between ** markers in <b> tags.
+   */
+  _escBold(str) {
+    if (!str) return '';
+    const escaped = this._esc(str);
+    return escaped.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
   }
 }
 
