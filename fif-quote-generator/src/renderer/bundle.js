@@ -22040,9 +22040,7 @@
         src: logoData,
         alt: "Current logo",
         className: "h-16 w-auto object-contain border border-slate-200 rounded-lg p-1",
-        onError: (e) => {
-          e.target.style.display = "none";
-        }
+        onError: () => setLogoData(null)
       }
     ) : /* @__PURE__ */ import_react3.default.createElement("div", { className: "h-16 w-24 bg-slate-100 border border-slate-200 rounded-lg flex items-center justify-center" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "text-xs text-slate-400" }, "No logo")), /* @__PURE__ */ import_react3.default.createElement(
       "button",
@@ -22148,16 +22146,14 @@
 
   // src/renderer/components/AppHeader.jsx
   var import_react4 = __toESM(require_react());
-  function AppHeader({ onSettingsClick, logoData }) {
+  function AppHeader({ onSettingsClick, logoData, onLogoError }) {
     return /* @__PURE__ */ import_react4.default.createElement("header", { className: "bg-white border-b border-slate-200 px-6 py-3 flex-shrink-0" }, /* @__PURE__ */ import_react4.default.createElement("div", { className: "flex items-center justify-between max-w-6xl mx-auto" }, /* @__PURE__ */ import_react4.default.createElement("div", { className: "flex items-center space-x-3" }, logoData ? /* @__PURE__ */ import_react4.default.createElement(
       "img",
       {
         src: logoData,
         alt: "Logo",
         className: "h-10 w-auto object-contain",
-        onError: (e) => {
-          e.target.style.display = "none";
-        }
+        onError: () => onLogoError && onLogoError()
       }
     ) : /* @__PURE__ */ import_react4.default.createElement("div", { className: "w-10 h-10 bg-brand-700 rounded-lg flex items-center justify-center" }, /* @__PURE__ */ import_react4.default.createElement("span", { className: "text-white font-bold text-sm" }, "FIF")), /* @__PURE__ */ import_react4.default.createElement("div", null, /* @__PURE__ */ import_react4.default.createElement("h1", { className: "text-lg font-semibold text-slate-800" }, "FIF Quote Generator"), /* @__PURE__ */ import_react4.default.createElement("p", { className: "text-xs text-slate-400" }, "Feet in Focus"))), /* @__PURE__ */ import_react4.default.createElement(
       "button",
@@ -22477,13 +22473,22 @@
       "tr",
       {
         className: `border-b border-slate-100 hover:bg-slate-50/50 ${isDragOver ? "bg-brand-50 border-t-2 border-t-brand-400" : ""}`,
-        draggable: true,
-        onDragStart: (e) => onDragStart(e, index),
         onDragOver: (e) => onDragOver(e, index),
-        onDragEnd,
         onDrop: (e) => onDrop(e, index)
       },
-      /* @__PURE__ */ import_react8.default.createElement("td", { className: "py-2 px-1 align-top w-8 cursor-grab active:cursor-grabbing" }, /* @__PURE__ */ import_react8.default.createElement("svg", { className: "w-4 h-4 text-slate-300 mt-1", fill: "currentColor", viewBox: "0 0 24 24" }, /* @__PURE__ */ import_react8.default.createElement("circle", { cx: "9", cy: "6", r: "1.5" }), /* @__PURE__ */ import_react8.default.createElement("circle", { cx: "15", cy: "6", r: "1.5" }), /* @__PURE__ */ import_react8.default.createElement("circle", { cx: "9", cy: "12", r: "1.5" }), /* @__PURE__ */ import_react8.default.createElement("circle", { cx: "15", cy: "12", r: "1.5" }), /* @__PURE__ */ import_react8.default.createElement("circle", { cx: "9", cy: "18", r: "1.5" }), /* @__PURE__ */ import_react8.default.createElement("circle", { cx: "15", cy: "18", r: "1.5" }))),
+      /* @__PURE__ */ import_react8.default.createElement(
+        "td",
+        {
+          className: "py-2 px-1 align-top w-8 cursor-grab active:cursor-grabbing",
+          draggable: true,
+          onDragStart: (e) => {
+            e.dataTransfer.effectAllowed = "move";
+            onDragStart(e, index);
+          },
+          onDragEnd
+        },
+        /* @__PURE__ */ import_react8.default.createElement("svg", { className: "w-4 h-4 text-slate-300 mt-1", fill: "currentColor", viewBox: "0 0 24 24" }, /* @__PURE__ */ import_react8.default.createElement("circle", { cx: "9", cy: "6", r: "1.5" }), /* @__PURE__ */ import_react8.default.createElement("circle", { cx: "15", cy: "6", r: "1.5" }), /* @__PURE__ */ import_react8.default.createElement("circle", { cx: "9", cy: "12", r: "1.5" }), /* @__PURE__ */ import_react8.default.createElement("circle", { cx: "15", cy: "12", r: "1.5" }), /* @__PURE__ */ import_react8.default.createElement("circle", { cx: "9", cy: "18", r: "1.5" }), /* @__PURE__ */ import_react8.default.createElement("circle", { cx: "15", cy: "18", r: "1.5" }))
+      ),
       /* @__PURE__ */ import_react8.default.createElement("td", { className: "py-2 px-2 align-top" }, /* @__PURE__ */ import_react8.default.createElement("div", { className: "text-sm font-mono text-slate-700" }, item.itemCode || "\u2014"), /* @__PURE__ */ import_react8.default.createElement("div", { className: "text-xs text-slate-400" }, item.category || "")),
       /* @__PURE__ */ import_react8.default.createElement("td", { className: "py-2 px-2 align-top" }, /* @__PURE__ */ import_react8.default.createElement(
         "input",
@@ -23172,16 +23177,16 @@ ${error.stack || ""}`);
     }
     if (screen === "settings-first") {
       return /* @__PURE__ */ import_react11.default.createElement("div", { className: "min-h-screen bg-slate-50 flex flex-col" }, /* @__PURE__ */ import_react11.default.createElement(AppHeader, { onSettingsClick: () => {
-      }, logoData }), /* @__PURE__ */ import_react11.default.createElement(Settings, { onBack: handleSettingsBack, isFirstTime: true }));
+      }, logoData, onLogoError: () => setLogoData(null) }), /* @__PURE__ */ import_react11.default.createElement(Settings, { onBack: handleSettingsBack, isFirstTime: true }));
     }
     if (screen === "data-loading") {
       return /* @__PURE__ */ import_react11.default.createElement("div", { className: "min-h-screen bg-slate-50 flex flex-col" }, /* @__PURE__ */ import_react11.default.createElement(AppHeader, { onSettingsClick: () => {
-      }, logoData }), /* @__PURE__ */ import_react11.default.createElement("main", { className: "flex-1 flex items-center justify-center" }, /* @__PURE__ */ import_react11.default.createElement("div", { className: "text-center" }, /* @__PURE__ */ import_react11.default.createElement("svg", { className: "w-8 h-8 animate-spin text-brand-500 mx-auto mb-3", fill: "none", viewBox: "0 0 24 24" }, /* @__PURE__ */ import_react11.default.createElement("circle", { className: "opacity-25", cx: "12", cy: "12", r: "10", stroke: "currentColor", strokeWidth: "4" }), /* @__PURE__ */ import_react11.default.createElement("path", { className: "opacity-75", fill: "currentColor", d: "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" })), /* @__PURE__ */ import_react11.default.createElement("p", { className: "text-sm text-slate-500 font-medium" }, "Loading Cliniko data..."), /* @__PURE__ */ import_react11.default.createElement("p", { className: "text-xs text-slate-400 mt-1" }, "Fetching services, products, and business info"))));
+      }, logoData, onLogoError: () => setLogoData(null) }), /* @__PURE__ */ import_react11.default.createElement("main", { className: "flex-1 flex items-center justify-center" }, /* @__PURE__ */ import_react11.default.createElement("div", { className: "text-center" }, /* @__PURE__ */ import_react11.default.createElement("svg", { className: "w-8 h-8 animate-spin text-brand-500 mx-auto mb-3", fill: "none", viewBox: "0 0 24 24" }, /* @__PURE__ */ import_react11.default.createElement("circle", { className: "opacity-25", cx: "12", cy: "12", r: "10", stroke: "currentColor", strokeWidth: "4" }), /* @__PURE__ */ import_react11.default.createElement("path", { className: "opacity-75", fill: "currentColor", d: "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" })), /* @__PURE__ */ import_react11.default.createElement("p", { className: "text-sm text-slate-500 font-medium" }, "Loading Cliniko data..."), /* @__PURE__ */ import_react11.default.createElement("p", { className: "text-xs text-slate-400 mt-1" }, "Fetching services, products, and business info"))));
     }
     if (screen === "settings") {
-      return /* @__PURE__ */ import_react11.default.createElement("div", { className: "min-h-screen bg-slate-50 flex flex-col" }, /* @__PURE__ */ import_react11.default.createElement(AppHeader, { onSettingsClick: () => setScreen("settings"), logoData }), /* @__PURE__ */ import_react11.default.createElement(Settings, { onBack: handleSettingsBack, isFirstTime: false }));
+      return /* @__PURE__ */ import_react11.default.createElement("div", { className: "min-h-screen bg-slate-50 flex flex-col" }, /* @__PURE__ */ import_react11.default.createElement(AppHeader, { onSettingsClick: () => setScreen("settings"), logoData, onLogoError: () => setLogoData(null) }), /* @__PURE__ */ import_react11.default.createElement(Settings, { onBack: handleSettingsBack, isFirstTime: false }));
     }
-    return /* @__PURE__ */ import_react11.default.createElement("div", { className: "min-h-screen bg-slate-50 flex flex-col" }, /* @__PURE__ */ import_react11.default.createElement(AppHeader, { onSettingsClick: () => setScreen("settings"), logoData }), /* @__PURE__ */ import_react11.default.createElement("main", { className: "flex-1 overflow-y-auto" }, /* @__PURE__ */ import_react11.default.createElement("div", { className: "max-w-4xl mx-auto p-6" }, dataError && /* @__PURE__ */ import_react11.default.createElement("div", { className: "mb-4 bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-center justify-between" }, /* @__PURE__ */ import_react11.default.createElement("div", { className: "flex items-center space-x-2" }, /* @__PURE__ */ import_react11.default.createElement("svg", { className: "w-4 h-4 text-amber-500 flex-shrink-0", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24" }, /* @__PURE__ */ import_react11.default.createElement(
+    return /* @__PURE__ */ import_react11.default.createElement("div", { className: "min-h-screen bg-slate-50 flex flex-col" }, /* @__PURE__ */ import_react11.default.createElement(AppHeader, { onSettingsClick: () => setScreen("settings"), logoData, onLogoError: () => setLogoData(null) }), /* @__PURE__ */ import_react11.default.createElement("main", { className: "flex-1 overflow-y-auto" }, /* @__PURE__ */ import_react11.default.createElement("div", { className: "max-w-4xl mx-auto p-6" }, dataError && /* @__PURE__ */ import_react11.default.createElement("div", { className: "mb-4 bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-center justify-between" }, /* @__PURE__ */ import_react11.default.createElement("div", { className: "flex items-center space-x-2" }, /* @__PURE__ */ import_react11.default.createElement("svg", { className: "w-4 h-4 text-amber-500 flex-shrink-0", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24" }, /* @__PURE__ */ import_react11.default.createElement(
       "path",
       {
         strokeLinecap: "round",
@@ -23219,7 +23224,7 @@ ${error.stack || ""}`);
         className: "text-xs text-slate-400 hover:text-slate-600 transition-colors"
       },
       "About"
-    ))), showAbout && /* @__PURE__ */ import_react11.default.createElement(AboutDialog, { onClose: () => setShowAbout(false), logoData }));
+    ))), showAbout && /* @__PURE__ */ import_react11.default.createElement(AboutDialog, { onClose: () => setShowAbout(false), logoData, onLogoError: () => setLogoData(null) }));
   }
   var container = document.getElementById("root");
   var root = (0, import_client.createRoot)(container);

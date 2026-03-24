@@ -519,7 +519,7 @@ export default function Settings({ onBack, isFirstTime }) {
                   src={logoData}
                   alt="Current logo"
                   className="h-16 w-auto object-contain border border-slate-200 rounded-lg p-1"
-                  onError={(e) => { e.target.style.display = 'none'; }}
+                  onError={() => setLogoData(null)}
                 />
               ) : (
                 <div className="h-16 w-24 bg-slate-100 border border-slate-200 rounded-lg flex items-center justify-center">

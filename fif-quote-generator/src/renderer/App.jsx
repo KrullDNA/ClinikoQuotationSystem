@@ -247,7 +247,7 @@ function App() {
   if (screen === 'settings-first') {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col">
-        <AppHeader onSettingsClick={() => {}} logoData={logoData} />
+        <AppHeader onSettingsClick={() => {}} logoData={logoData} onLogoError={() => setLogoData(null)} />
         <Settings onBack={handleSettingsBack} isFirstTime={true} />
       </div>
     );
@@ -257,7 +257,7 @@ function App() {
   if (screen === 'data-loading') {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col">
-        <AppHeader onSettingsClick={() => {}} logoData={logoData} />
+        <AppHeader onSettingsClick={() => {}} logoData={logoData} onLogoError={() => setLogoData(null)} />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <svg className="w-8 h-8 animate-spin text-brand-500 mx-auto mb-3" fill="none" viewBox="0 0 24 24">
@@ -276,7 +276,7 @@ function App() {
   if (screen === 'settings') {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col">
-        <AppHeader onSettingsClick={() => setScreen('settings')} logoData={logoData} />
+        <AppHeader onSettingsClick={() => setScreen('settings')} logoData={logoData} onLogoError={() => setLogoData(null)} />
         <Settings onBack={handleSettingsBack} isFirstTime={false} />
       </div>
     );
@@ -285,7 +285,7 @@ function App() {
   // Main app screen
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
-      <AppHeader onSettingsClick={() => setScreen('settings')} logoData={logoData} />
+      <AppHeader onSettingsClick={() => setScreen('settings')} logoData={logoData} onLogoError={() => setLogoData(null)} />
 
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-4xl mx-auto p-6">
@@ -342,7 +342,7 @@ function App() {
         </div>
       </footer>
 
-      {showAbout && <AboutDialog onClose={() => setShowAbout(false)} logoData={logoData} />}
+      {showAbout && <AboutDialog onClose={() => setShowAbout(false)} logoData={logoData} onLogoError={() => setLogoData(null)} />}
     </div>
   );
 }

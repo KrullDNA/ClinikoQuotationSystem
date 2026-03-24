@@ -19,14 +19,20 @@ function LineItemRow({ item, index, onChange, onDelete, onDragStart, onDragOver,
   return (
     <tr
       className={`border-b border-slate-100 hover:bg-slate-50/50 ${isDragOver ? 'bg-brand-50 border-t-2 border-t-brand-400' : ''}`}
-      draggable
-      onDragStart={(e) => onDragStart(e, index)}
       onDragOver={(e) => onDragOver(e, index)}
-      onDragEnd={onDragEnd}
       onDrop={(e) => onDrop(e, index)}
     >
-      {/* Drag handle */}
-      <td className="py-2 px-1 align-top w-8 cursor-grab active:cursor-grabbing">
+      {/* Drag handle — only this cell is draggable */}
+      <td
+        className="py-2 px-1 align-top w-8 cursor-grab active:cursor-grabbing"
+        draggable
+        onDragStart={(e) => {
+          // Set drag data on the row's parent tr
+          e.dataTransfer.effectAllowed = 'move';
+          onDragStart(e, index);
+        }}
+        onDragEnd={onDragEnd}
+      >
         <svg className="w-4 h-4 text-slate-300 mt-1" fill="currentColor" viewBox="0 0 24 24">
           <circle cx="9" cy="6" r="1.5"/>
           <circle cx="15" cy="6" r="1.5"/>

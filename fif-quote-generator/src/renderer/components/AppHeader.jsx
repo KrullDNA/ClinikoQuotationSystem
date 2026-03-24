@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function AppHeader({ onSettingsClick, logoData }) {
+export default function AppHeader({ onSettingsClick, logoData, onLogoError }) {
   return (
     <header className="bg-white border-b border-slate-200 px-6 py-3 flex-shrink-0">
       <div className="flex items-center justify-between max-w-6xl mx-auto">
@@ -10,7 +10,7 @@ export default function AppHeader({ onSettingsClick, logoData }) {
               src={logoData}
               alt="Logo"
               className="h-10 w-auto object-contain"
-              onError={(e) => { e.target.style.display = 'none'; }}
+              onError={() => onLogoError && onLogoError()}
             />
           ) : (
             <div className="w-10 h-10 bg-brand-700 rounded-lg flex items-center justify-center">
