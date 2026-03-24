@@ -10,6 +10,30 @@ const pdfGenerator = new PDFGenerator();
 
 let mainWindow;
 
+// ─── In-memory data cache ────────────────────────────────────────────────────
+const dataCache = {
+  billableItems: null,
+  products: null,
+  businesses: null,
+  taxes: null,
+  loaded: false
+};
+
+async function loadAllData() {
+  const [billableItems, products, businesses, taxes] = await Promise.all([
+    clinikoAPI.getBillableItems(),
+    clinikoAPI.getProducts(),
+    clinikoAPI.getBusinesses(),
+    clinikoAPI.getTaxes()
+  ]);
+  dataCache.billableItems = billableItems;
+  dataCache.products = products;
+  dataCache.businesses = businesses;
+  dataCache.taxes = taxes;
+  dataCache.loaded = true;
+  return { billableItems, products, businesses, taxes };
+}
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
@@ -329,6 +353,44 @@ ipcMain.handle('get-logo-data', async () => {
 ipcMain.handle('get-lockout-status', async () => {
   try {
     return { success: true, data: config.getLockoutStatus() };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// ─── Cached data loading ─────────────────────────────────────────────────────
+
+// Load all Cliniko data (billable items, products, businesses, taxes)
+ipcMain.handle('load-all-data', async () => {
+  try {
+    const data = await loadAllData();
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Get cached data (returns from memory, no API call)
+ipcMain.handle('get-cached-data', async () => {
+  if (!dataCache.loaded) {
+    return { success: false, error: 'Data not loaded yet.' };
+  }
+  return {
+    success: true,
+    data: {
+      billableItems: dataCache.billableItems,
+      products: dataCache.products,
+      businesses: dataCache.businesses,
+      taxes: dataCache.taxes
+    }
+  };
+});
+
+// Refresh cached data (re-fetch from API)
+ipcMain.handle('refresh-data', async () => {
+  try {
+    const data = await loadAllData();
+    return { success: true, data };
   } catch (error) {
     return { success: false, error: error.message };
   }

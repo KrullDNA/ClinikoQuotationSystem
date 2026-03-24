@@ -6,15 +6,25 @@ import Settings from './components/Settings';
 import AppHeader from './components/AppHeader';
 import PatientLookup from './components/PatientLookup';
 import PatientDetails from './components/PatientDetails';
+import QuoteBuilder from './components/QuoteBuilder';
 import { parsePatient } from './utils/parsePatient';
 
 function App() {
-  // App state: 'loading' | 'setup' | 'pin' | 'settings-first' | 'main' | 'settings'
+  // App state: 'loading' | 'setup' | 'pin' | 'settings-first' | 'data-loading' | 'main' | 'settings'
   const [screen, setScreen] = useState('loading');
   const [logoData, setLogoData] = useState(null);
 
   // Patient state — held in memory only
   const [patient, setPatient] = useState(null);
+
+  // Cliniko data cache (in renderer memory)
+  const [clinikoData, setClinikoData] = useState({
+    billableItems: [],
+    products: [],
+    businesses: [],
+    taxes: []
+  });
+  const [dataError, setDataError] = useState(null);
 
   useEffect(() => {
     checkInitialState();
@@ -44,9 +54,32 @@ function App() {
     }
   }
 
+  async function loadClinikoData() {
+    setDataError(null);
+    try {
+      const hasKey = await window.api.hasApiKey();
+      if (!hasKey.success || !hasKey.data) {
+        // No API key — skip data loading, go straight to main
+        setScreen('main');
+        return;
+      }
+
+      setScreen('data-loading');
+      const result = await window.api.loadAllData();
+      if (result.success) {
+        setClinikoData(result.data);
+      } else {
+        setDataError(result.error);
+      }
+    } catch (err) {
+      setDataError('Failed to load Cliniko data.');
+    }
+    setScreen('main');
+  }
+
   function handleUnlock() {
     loadLogo();
-    setScreen('main');
+    loadClinikoData();
   }
 
   function handleSetupComplete() {
@@ -55,7 +88,8 @@ function App() {
 
   function handleSettingsBack() {
     loadLogo();
-    setScreen('main');
+    // Reload data in case API key or shard changed
+    loadClinikoData();
   }
 
   function handlePatientFound(rawPatient) {
@@ -64,8 +98,13 @@ function App() {
   }
 
   function handleClearPatient() {
-    // Purge ALL patient data from state
     setPatient(null);
+  }
+
+  function handleGenerateQuote(quoteData) {
+    // Placeholder — will be implemented in Session 5
+    console.log('Generate quote:', quoteData);
+    alert('Quote generation will be implemented in Session 5.\n\nQuote data has been assembled successfully.');
   }
 
   // Loading state
@@ -102,6 +141,25 @@ function App() {
     );
   }
 
+  // Data loading screen
+  if (screen === 'data-loading') {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col">
+        <AppHeader onSettingsClick={() => {}} logoData={logoData} />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <svg className="w-8 h-8 animate-spin text-brand-500 mx-auto mb-3" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+            <p className="text-sm text-slate-500 font-medium">Loading Cliniko data...</p>
+            <p className="text-xs text-slate-400 mt-1">Fetching services, products, and business info</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   // Settings screen (from main app)
   if (screen === 'settings') {
     return (
@@ -119,6 +177,26 @@ function App() {
 
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-4xl mx-auto p-6">
+          {/* Data loading error banner */}
+          {dataError && (
+            <div className="mb-4 bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <svg className="w-4 h-4 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                    d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-sm text-amber-700">Could not load Cliniko data: {dataError}</p>
+              </div>
+              <button
+                onClick={() => loadClinikoData()}
+                className="text-xs font-medium text-amber-700 hover:text-amber-800 px-2 py-1 rounded
+                           hover:bg-amber-100 transition-colors"
+              >
+                Retry
+              </button>
+            </div>
+          )}
+
           {/* Patient Lookup */}
           <PatientLookup
             onPatientFound={handlePatientFound}
@@ -129,14 +207,12 @@ function App() {
           {/* Patient Details Card */}
           <PatientDetails patient={patient} />
 
-          {/* Placeholder for Session 4: Line Items Table */}
-          {patient && (
-            <div className="mt-4 bg-white rounded-xl border border-slate-200 border-dashed p-8 text-center">
-              <p className="text-sm text-slate-400">
-                Line items table will appear here (Session 4)
-              </p>
-            </div>
-          )}
+          {/* Quote Builder (line items, business, notes, etc.) */}
+          <QuoteBuilder
+            patient={patient}
+            clinikoData={clinikoData}
+            onGenerateQuote={handleGenerateQuote}
+          />
         </div>
       </main>
 

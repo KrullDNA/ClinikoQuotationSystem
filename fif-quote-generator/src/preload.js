@@ -85,5 +85,15 @@ contextBridge.exposeInMainWorld('api', {
 
   // Lockout status
   getLockoutStatus: () =>
-    ipcRenderer.invoke('get-lockout-status')
+    ipcRenderer.invoke('get-lockout-status'),
+
+  // Cached data loading
+  loadAllData: () =>
+    ipcRenderer.invoke('load-all-data'),
+
+  getCachedData: () =>
+    ipcRenderer.invoke('get-cached-data'),
+
+  refreshData: () =>
+    ipcRenderer.invoke('refresh-data')
 });

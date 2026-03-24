@@ -5,8 +5,8 @@
 | 1       | Project Scaffolding + Security Arch  | **Complete**   | No deviations. |
 | 2       | Settings + PIN Authentication        | **Complete**   | No deviations. |
 | 3       | Patient Lookup + Display             | **Complete**   | No deviations. |
-| 4       | Line Items Table                     | Ready to Start | — |
-| 5       | PDF Generation                       | Not Started    | — |
+| 4       | Line Items Table                     | **Complete**   | No deviations. |
+| 5       | PDF Generation                       | Ready to Start | — |
 | 6       | Upload + Save + Print                | Not Started    | — |
 | 7       | Polish + Packaging + Testing         | Not Started    | — |
 
@@ -57,3 +57,30 @@
 - Clear Patient button purges all patient data from React state
 - Patient internal ID (for uploads) stored in state but never displayed
 - Main screen layout: lookup at top, patient card below, placeholder for line items
+
+## Session 4 Notes
+
+- Data loading after PIN unlock: fetches billable items, products (paginated), businesses, taxes in parallel
+- In-memory cache in main process with loadAllData/getCachedData/refreshData IPC handlers
+- "Loading Cliniko data..." screen with spinner shown during initial data fetch
+- Error banner with retry button if data loading fails
+- ItemSearchDropdown: searchable type-to-filter dropdown grouped into Services and Products
+  - Display format: [item_code] — item_name — $price
+  - Keyboard navigation (arrow up/down, Enter, Escape)
+  - Click-outside-to-close behaviour
+  - Resets after selection, ready for next item
+- LineItemsTable: editable rows with Item Code, Description, Qty, Unit Cost, GST, Total, Delete
+  - Description is freely editable text (pre-filled from item name)
+  - Qty defaults to 1, minimum 1
+  - Unit Cost editable currency field
+  - GST toggleable per row (click to switch on/off), shows dollar amount or "$ -"
+  - For billable items: GST if tax.links.self exists
+  - For products: GST if price_ex_tax !== price_including_tax
+  - Real-time total calculation
+- Add Custom Item button for blank rows (all fields editable)
+- QuoteBuilder component wrapping: quote number (free text, required), business selector, line items, notes, terms, validity
+- Business selector defaults to config default, populated from cached businesses
+- Terms & conditions and validity pre-filled from config defaults, editable per quote
+- Form validation: requires patient, at least one line item, and quote number
+- Generate Quote button assembles full quoteData object (wired in Session 5)
+- All amounts formatted as $X,XXX.XX using en-AU locale
