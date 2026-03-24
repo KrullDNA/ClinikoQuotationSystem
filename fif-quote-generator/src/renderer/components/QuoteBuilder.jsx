@@ -97,6 +97,15 @@ export default function QuoteBuilder({
     setLineItems(prev => prev.filter((_, i) => i !== index));
   }
 
+  function handleLineItemReorder(fromIndex, toIndex) {
+    setLineItems(prev => {
+      const next = [...prev];
+      const [moved] = next.splice(fromIndex, 1);
+      next.splice(toIndex, 0, moved);
+      return next;
+    });
+  }
+
   function handleGenerate() {
     const errors = [];
     if (!patient) errors.push('Please look up a patient first.');
@@ -212,6 +221,7 @@ export default function QuoteBuilder({
           onChange={handleLineItemChange}
           onDelete={handleLineItemDelete}
           onAddCustom={handleAddCustom}
+          onReorder={handleLineItemReorder}
         />
       </div>
 

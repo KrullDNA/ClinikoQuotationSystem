@@ -209,7 +209,7 @@ ipcMain.handle('open-preview', async (_event, pdfPath, quoteData) => {
       pdfPath,
       quoteNumber: quoteData.quoteNumber,
       date: quoteData.date,
-      patientId: quoteData.patient ? quoteData.patient.internalId : null,
+      patientId: quoteData.patient ? quoteData.patient.id : null,
       patientName: quoteData.patient ? quoteData.patient.fullName : '',
       patientLastName: quoteData.patient ? (quoteData.patient.fullName || '').split(' ').pop() : '',
       shard: config.getShard()

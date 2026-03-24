@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 
 function fmt(num) {
   return num.toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-function LineItemRow({ item, index, onChange, onDelete }) {
+function LineItemRow({ item, index, onChange, onDelete, onDragStart, onDragOver, onDragEnd, onDrop, isDragOver }) {
   const qty = item.qty || 1;
   const unitCost = item.unitCost || 0;
   const gstRate = item.hasGst ? 0.10 : 0;
@@ -17,10 +17,29 @@ function LineItemRow({ item, index, onChange, onDelete }) {
   }
 
   return (
-    <tr className="border-b border-slate-100 hover:bg-slate-50/50">
+    <tr
+      className={`border-b border-slate-100 hover:bg-slate-50/50 ${isDragOver ? 'bg-brand-50 border-t-2 border-t-brand-400' : ''}`}
+      draggable
+      onDragStart={(e) => onDragStart(e, index)}
+      onDragOver={(e) => onDragOver(e, index)}
+      onDragEnd={onDragEnd}
+      onDrop={(e) => onDrop(e, index)}
+    >
+      {/* Drag handle */}
+      <td className="py-2 px-1 align-top w-8 cursor-grab active:cursor-grabbing">
+        <svg className="w-4 h-4 text-slate-300 mt-1" fill="currentColor" viewBox="0 0 24 24">
+          <circle cx="9" cy="6" r="1.5"/>
+          <circle cx="15" cy="6" r="1.5"/>
+          <circle cx="9" cy="12" r="1.5"/>
+          <circle cx="15" cy="12" r="1.5"/>
+          <circle cx="9" cy="18" r="1.5"/>
+          <circle cx="15" cy="18" r="1.5"/>
+        </svg>
+      </td>
+
       {/* Item Code + Category */}
       <td className="py-2 px-2 align-top">
-        <div className="text-sm font-mono text-slate-700">{item.itemCode || '—'}</div>
+        <div className="text-sm font-mono text-slate-700">{item.itemCode || '\u2014'}</div>
         <div className="text-xs text-slate-400">{item.category || ''}</div>
       </td>
 
@@ -102,7 +121,44 @@ function LineItemRow({ item, index, onChange, onDelete }) {
   );
 }
 
-export default function LineItemsTable({ lineItems, onChange, onDelete, onAddCustom }) {
+export default function LineItemsTable({ lineItems, onChange, onDelete, onAddCustom, onReorder }) {
+  const [dragIndex, setDragIndex] = useState(null);
+  const [dragOverIndex, setDragOverIndex] = useState(null);
+
+  function handleDragStart(e, index) {
+    setDragIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+    // Make the drag image slightly transparent
+    if (e.target && e.target.style) {
+      setTimeout(() => { e.target.style.opacity = '0.5'; }, 0);
+    }
+  }
+
+  function handleDragOver(e, index) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (index !== dragOverIndex) {
+      setDragOverIndex(index);
+    }
+  }
+
+  function handleDragEnd(e) {
+    if (e.target && e.target.style) {
+      e.target.style.opacity = '1';
+    }
+    setDragIndex(null);
+    setDragOverIndex(null);
+  }
+
+  function handleDrop(e, toIndex) {
+    e.preventDefault();
+    if (dragIndex !== null && dragIndex !== toIndex && onReorder) {
+      onReorder(dragIndex, toIndex);
+    }
+    setDragIndex(null);
+    setDragOverIndex(null);
+  }
+
   // Calculate totals
   const totalAmount = lineItems.reduce((sum, item) => {
     const qty = item.qty || 1;
@@ -119,6 +175,7 @@ export default function LineItemsTable({ lineItems, onChange, onDelete, onAddCus
           <table className="w-full">
             <thead>
               <tr className="border-b border-slate-200">
+                <th className="w-8 py-2 px-1"></th>
                 <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wide py-2 px-2 w-28">Item</th>
                 <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wide py-2 px-2">Description</th>
                 <th className="text-center text-xs font-medium text-slate-500 uppercase tracking-wide py-2 px-2 w-20">Qty</th>
@@ -136,6 +193,11 @@ export default function LineItemsTable({ lineItems, onChange, onDelete, onAddCus
                   index={index}
                   onChange={onChange}
                   onDelete={onDelete}
+                  onDragStart={handleDragStart}
+                  onDragOver={handleDragOver}
+                  onDragEnd={handleDragEnd}
+                  onDrop={handleDrop}
+                  isDragOver={dragOverIndex === index && dragIndex !== index}
                 />
               ))}
             </tbody>
