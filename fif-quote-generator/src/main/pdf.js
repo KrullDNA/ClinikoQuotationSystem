@@ -214,11 +214,12 @@ body {
 }
 .page {
   width: 210mm;
-  min-height: 297mm;
-  padding: 14mm 18mm 10mm 18mm;
+  height: 297mm;
+  padding: 10mm;
   position: relative;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 /* ── HEADER ── */
@@ -233,9 +234,9 @@ body {
   width: auto;
 }
 .header-title {
-  font-size: 30pt;
-  font-weight: 700;
-  color: #c0c0c0;
+  font-size: 18pt;
+  font-weight: 400;
+  color: #000;
   letter-spacing: 3px;
   text-transform: uppercase;
   line-height: 1;
