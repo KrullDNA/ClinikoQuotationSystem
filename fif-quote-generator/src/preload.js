@@ -105,5 +105,32 @@ contextBridge.exposeInMainWorld('api', {
   onResetForNewQuote: (callback) => {
     ipcRenderer.on('reset-for-new-quote', callback);
     return () => ipcRenderer.removeListener('reset-for-new-quote', callback);
-  }
+  },
+
+  // Error logging
+  logError: (message) =>
+    ipcRenderer.invoke('log-error', message),
+
+  // Diagnostics
+  diagApiConnection: () =>
+    ipcRenderer.invoke('diag-api-connection'),
+
+  diagPatientLookup: (refNumber) =>
+    ipcRenderer.invoke('diag-patient-lookup', refNumber),
+
+  diagBillableItems: () =>
+    ipcRenderer.invoke('diag-billable-items'),
+
+  diagProducts: () =>
+    ipcRenderer.invoke('diag-products'),
+
+  diagPdfGeneration: () =>
+    ipcRenderer.invoke('diag-pdf-generation'),
+
+  diagUploadDryRun: () =>
+    ipcRenderer.invoke('diag-upload-dry-run'),
+
+  // App version
+  getAppVersion: () =>
+    ipcRenderer.invoke('get-app-version')
 });

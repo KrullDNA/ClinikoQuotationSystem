@@ -8,7 +8,9 @@
 | 4       | Line Items Table                     | **Complete**   | No deviations. |
 | 5       | PDF Generation                       | **Complete**   | Used Electron printToPDF instead of puppeteer-core (see notes). |
 | 6       | Upload + Save + Print                | **Complete**   | No deviations. |
-| 7       | Polish + Packaging + Testing         | Ready to Start | — |
+| 7       | Polish + Packaging + Testing         | **Complete**   | No deviations. |
+
+**Build Complete — 24/03/2026**
 
 ## Session 1 Notes
 
@@ -157,3 +159,37 @@
 - patient_id uses internal Cliniko ID (not old_reference_id)
 - quote description format: "Quote {number} — {date}"
 - shell.openExternal for "View in Cliniko" link
+
+## Session 7 Notes
+
+- Keyboard shortcuts: Ctrl+N (new quote with confirmation), Enter in ref field (patient lookup)
+- Confirmation dialog before clearing a quote in progress (if patient loaded)
+- About dialog: app name, version, logo, "Built by KDNA — Krull Design & Advertising"
+  - Accessible via "About" link in footer
+- ErrorBoundary: wraps entire React app, catches unhandled errors
+  - Shows friendly "Something went wrong" message
+  - "Copy Error Details" button for debugging
+  - "Restart App" button to reload
+- File logger: rotating log (max 1MB) at userData/fif-quote.log
+  - Catches uncaughtException and unhandledRejection in main process
+  - Renderer errors logged via logError IPC
+- Memory cleanup: before-quit event purges all cached data
+- Diagnostics panel in Settings (Run Diagnostics button):
+  - Test 1: API Connection (GET /businesses, reports count)
+  - Test 2: Patient Lookup (prompts for ref, reports field count)
+  - Test 3: Billable Items (reports count)
+  - Test 4: Products (all pages, reports count)
+  - Test 5: PDF Generation (dummy quote, creates PDF)
+  - Test 6: Upload Dry Run (steps 1-2 only, no attachment created)
+  - Results in pass/fail table with spinner/status per test
+- Packaging (electron-builder):
+  - appId: com.feetinfocus.quotegenerator
+  - productName: FIF Quote Generator
+  - Windows NSIS installer target
+  - build:win script added (npm run build:win)
+  - Placeholder icon documented in build/ICON_PLACEHOLDER.md
+  - No auto-update, no code signing for v1
+- form-data added as explicit dependency (was transitive via puppeteer-core)
+- puppeteer-core removed from dependencies (not used — Electron printToPDF used instead)
+- README.md fully rewritten: prerequisites, setup, first launch, daily usage,
+  keyboard shortcuts, project structure, brand assets, security, troubleshooting, diagnostics

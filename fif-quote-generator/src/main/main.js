@@ -1,6 +1,7 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, globalShortcut, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 const config = require('./config');
 const { ClinikoAPI } = require('./api');
 const { PDFGenerator } = require('./pdf');
@@ -10,6 +11,36 @@ const pdfGenerator = new PDFGenerator();
 
 let mainWindow;
 let previewWindow;
+
+// ─── Simple file logger (rotating, max 1MB) ─────────────────────────────────
+const LOG_PATH = path.join(app.getPath('userData'), 'fif-quote.log');
+const LOG_MAX_SIZE = 1024 * 1024; // 1MB
+
+function logToFile(level, message) {
+  try {
+    const timestamp = new Date().toISOString();
+    const line = `[${timestamp}] [${level}] ${message}\n`;
+    // Rotate if over max size
+    if (fs.existsSync(LOG_PATH)) {
+      const stats = fs.statSync(LOG_PATH);
+      if (stats.size > LOG_MAX_SIZE) {
+        const oldPath = LOG_PATH + '.old';
+        if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+        fs.renameSync(LOG_PATH, oldPath);
+      }
+    }
+    fs.appendFileSync(LOG_PATH, line);
+  } catch (e) {
+    // Fail silently
+  }
+}
+
+process.on('uncaughtException', (err) => {
+  logToFile('ERROR', `Uncaught: ${err.stack || err.message}`);
+});
+process.on('unhandledRejection', (reason) => {
+  logToFile('ERROR', `Unhandled rejection: ${reason}`);
+});
 
 // ─── In-memory data cache ────────────────────────────────────────────────────
 const dataCache = {
@@ -61,7 +92,10 @@ function createWindow() {
   });
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  createWindow();
+  logToFile('INFO', 'App started');
+});
 
 app.on('window-all-closed', () => {
   app.quit();
@@ -71,6 +105,17 @@ app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
+});
+
+// ─── Memory cleanup on quit ──────────────────────────────────────────────────
+app.on('before-quit', () => {
+  // Purge all cached data
+  dataCache.billableItems = null;
+  dataCache.products = null;
+  dataCache.businesses = null;
+  dataCache.taxes = null;
+  dataCache.loaded = false;
+  logToFile('INFO', 'App quit — data cache purged');
 });
 
 // ─── IPC Handlers ───────────────────────────────────────────────────────────
@@ -558,4 +603,124 @@ ipcMain.handle('refresh-data', async () => {
   } catch (error) {
     return { success: false, error: error.message };
   }
+});
+
+// ─── Diagnostics ─────────────────────────────────────────────────────────────
+
+// Log error from renderer
+ipcMain.handle('log-error', async (_event, message) => {
+  logToFile('ERROR', `[renderer] ${message}`);
+  return { success: true };
+});
+
+// Run diagnostics: API connection test
+ipcMain.handle('diag-api-connection', async () => {
+  try {
+    const businesses = await clinikoAPI.getBusinesses();
+    return { success: true, data: { count: businesses.length } };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Run diagnostics: patient lookup
+ipcMain.handle('diag-patient-lookup', async (_event, refNumber) => {
+  try {
+    const patient = await clinikoAPI.getPatient(refNumber);
+    if (!patient) return { success: true, data: { found: false, fieldCount: 0 } };
+    const fieldCount = Object.keys(patient).length;
+    return { success: true, data: { found: true, fieldCount } };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Run diagnostics: billable items count
+ipcMain.handle('diag-billable-items', async () => {
+  try {
+    const items = await clinikoAPI.getBillableItems();
+    return { success: true, data: { count: items.length } };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Run diagnostics: products count (all pages)
+ipcMain.handle('diag-products', async () => {
+  try {
+    const products = await clinikoAPI.getProducts();
+    return { success: true, data: { count: products.length } };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Run diagnostics: generate dummy PDF
+ipcMain.handle('diag-pdf-generation', async () => {
+  try {
+    const dummyData = {
+      quoteNumber: 'DIAG-TEST',
+      date: new Date().toLocaleDateString('en-AU', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+      patient: { fullName: 'Test Patient', fundingScheme: 'NDIS', ndisNumber: '12345678' },
+      business: {
+        business_name: 'Feet in Focus',
+        address: { address_1: 'Unit 9, 64 Talavera Road', city: 'Macquarie Park', state: 'NSW', post_code: '2113' },
+        contact_information: { phone: '(02) 8964 1874', fax: '(02) 8068 9716' }
+      },
+      lineItems: [
+        { itemCode: 'DIAG-001', category: 'Test Service', description: 'Diagnostic test item', qty: 1, unitCost: 100, hasGst: true, gstAmount: 10, total: 110 }
+      ],
+      totalAmount: 110,
+      notes: '',
+      terms: '',
+      validity: '30 days'
+    };
+    const filePath = await pdfGenerator.generateQuote(dummyData);
+    return { success: true, data: { filePath } };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Run diagnostics: upload dry run (steps 1-2 only)
+ipcMain.handle('diag-upload-dry-run', async () => {
+  try {
+    // Step 1: Get presigned URL
+    const presigned = await clinikoAPI.getPresignedPost();
+    if (!presigned || !presigned.url) {
+      return { success: false, error: 'Failed to get presigned URL' };
+    }
+
+    // Step 2: Upload a tiny test file
+    const axios = require('axios');
+    const FormData = require('form-data');
+    const tmpFile = path.join(os.tmpdir(), 'fif-diag-test.txt');
+    fs.writeFileSync(tmpFile, 'FIF Quote Generator diagnostic test');
+
+    const form = new FormData();
+    const fields = presigned.fields || {};
+    for (const [key, value] of Object.entries(fields)) {
+      const fieldValue = typeof value === 'string'
+        ? value.replace('${filename}', 'diag-test.txt')
+        : value;
+      form.append(key, fieldValue);
+    }
+    form.append('file', fs.createReadStream(tmpFile));
+
+    await axios.post(presigned.url, form, {
+      headers: form.getHeaders()
+    });
+
+    // Clean up
+    try { fs.unlinkSync(tmpFile); } catch (e) { /* ignore */ }
+
+    return { success: true, data: { message: 'Steps 1-2 passed (no attachment created)' } };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Get app version
+ipcMain.handle('get-app-version', async () => {
+  return { success: true, data: app.getVersion() };
 });

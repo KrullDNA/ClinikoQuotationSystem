@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
 import PinScreen from './components/PinScreen';
 import SetupWizard from './components/SetupWizard';
@@ -7,7 +7,50 @@ import AppHeader from './components/AppHeader';
 import PatientLookup from './components/PatientLookup';
 import PatientDetails from './components/PatientDetails';
 import QuoteBuilder from './components/QuoteBuilder';
+import ErrorBoundary from './components/ErrorBoundary';
 import { parsePatient } from './utils/parsePatient';
+
+// ── About Modal ──────────────────────────────────────────────────────────────
+function AboutDialog({ onClose, logoData }) {
+  const [version, setVersion] = useState('1.0.0');
+
+  useEffect(() => {
+    window.api.getAppVersion().then(r => {
+      if (r.success) setVersion(r.data);
+    }).catch(() => {});
+  }, []);
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+      onClick={onClose}>
+      <div className="bg-white rounded-xl p-8 max-w-sm w-full text-center shadow-xl"
+        onClick={(e) => e.stopPropagation()}>
+        {logoData ? (
+          <img src={logoData} alt="Feet in Focus" className="h-14 mx-auto mb-4" />
+        ) : (
+          <div className="w-14 h-14 bg-brand-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <span className="text-white font-bold text-lg">FIF</span>
+          </div>
+        )}
+        <h2 className="text-lg font-semibold text-slate-800">FIF Quote Generator</h2>
+        <p className="text-sm text-slate-500 mt-1">Version {version}</p>
+        <p className="text-xs text-slate-400 mt-4">
+          Built by KDNA — Krull Design & Advertising
+        </p>
+        <p className="text-xs text-slate-400 mt-1">
+          Feet in Focus Pty Ltd — ABN 42 148 020 526
+        </p>
+        <button
+          onClick={onClose}
+          className="mt-6 px-6 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-medium
+                     hover:bg-slate-200 transition-colors"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function App() {
   // App state: 'loading' | 'setup' | 'pin' | 'settings-first' | 'data-loading' | 'main' | 'settings'
@@ -25,6 +68,9 @@ function App() {
     taxes: []
   });
   const [dataError, setDataError] = useState(null);
+
+  // About dialog
+  const [showAbout, setShowAbout] = useState(false);
 
   useEffect(() => {
     checkInitialState();
@@ -59,7 +105,6 @@ function App() {
     try {
       const hasKey = await window.api.hasApiKey();
       if (!hasKey.success || !hasKey.data) {
-        // No API key — skip data loading, go straight to main
         setScreen('main');
         return;
       }
@@ -88,7 +133,6 @@ function App() {
 
   function handleSettingsBack() {
     loadLogo();
-    // Reload data in case API key or shard changed
     loadClinikoData();
   }
 
@@ -100,7 +144,15 @@ function App() {
   // Reset key — incrementing this forces QuoteBuilder to remount and reset all state
   const [resetKey, setResetKey] = useState(0);
 
+  // Check if there are unsaved changes
+  const hasUnsavedWork = useCallback(() => {
+    return !!patient || resetKey > 0;
+  }, [patient, resetKey]);
+
   function handleClearPatient() {
+    if (patient) {
+      if (!window.confirm('You have unsaved changes. Clear this quote?')) return;
+    }
     setPatient(null);
   }
 
@@ -119,6 +171,29 @@ function App() {
     return cleanup;
   }, []);
 
+  // ── Keyboard shortcuts ──
+  useEffect(() => {
+    function handleKeyDown(e) {
+      // Only on main screen
+      if (screen !== 'main') return;
+
+      // Ctrl+N: New quote
+      if (e.ctrlKey && e.key === 'n') {
+        e.preventDefault();
+        if (patient) {
+          if (window.confirm('You have unsaved changes. Clear this quote?')) {
+            handleCreateAnotherQuote();
+          }
+        } else {
+          handleCreateAnotherQuote();
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [screen, patient]);
+
   const [generating, setGenerating] = useState(false);
 
   async function handleGenerateQuote(quoteData) {
@@ -126,7 +201,6 @@ function App() {
     setGenerating(true);
 
     try {
-      // Step 1: Generate PDF via main process
       const result = await window.api.generateQuote(quoteData);
       if (!result.success) {
         alert('Failed to generate quote: ' + (result.error || 'Unknown error'));
@@ -135,8 +209,6 @@ function App() {
       }
 
       const pdfPath = result.data;
-
-      // Step 2: Open preview window
       await window.api.openPreview(pdfPath, quoteData);
     } catch (err) {
       alert('Error generating quote: ' + err.message);
@@ -259,13 +331,24 @@ function App() {
       <footer className="bg-white border-t border-slate-200 px-6 py-3 flex-shrink-0">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <p className="text-xs text-slate-400">Feet in Focus Pty Ltd — ABN 42 148 020 526</p>
-          <p className="text-xs text-slate-400">info@feetinfocus.com.au</p>
+          <button
+            onClick={() => setShowAbout(true)}
+            className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
+          >
+            About
+          </button>
         </div>
       </footer>
+
+      {showAbout && <AboutDialog onClose={() => setShowAbout(false)} logoData={logoData} />}
     </div>
   );
 }
 
 const container = document.getElementById('root');
 const root = createRoot(container);
-root.render(<App />);
+root.render(
+  <ErrorBoundary>
+    <App />
+  </ErrorBoundary>
+);

@@ -1,4 +1,121 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+
+function DiagnosticsPanel() {
+  const [results, setResults] = useState([]);
+  const [running, setRunning] = useState(false);
+  const [patientRef, setPatientRef] = useState('');
+  const [showRefPrompt, setShowRefPrompt] = useState(false);
+
+  const tests = [
+    { id: 'api', name: 'API Connection', run: () => window.api.diagApiConnection(), format: (d) => `${d.count} businesses found` },
+    { id: 'patient', name: 'Patient Lookup', run: (ref) => window.api.diagPatientLookup(ref), format: (d) => d.found ? `Found — ${d.fieldCount} fields` : 'No patient found' },
+    { id: 'billable', name: 'Billable Items', run: () => window.api.diagBillableItems(), format: (d) => `${d.count} items` },
+    { id: 'products', name: 'Products', run: () => window.api.diagProducts(), format: (d) => `${d.count} products` },
+    { id: 'pdf', name: 'PDF Generation', run: () => window.api.diagPdfGeneration(), format: (d) => 'PDF created' },
+    { id: 'upload', name: 'Upload Dry Run', run: () => window.api.diagUploadDryRun(), format: (d) => d.message }
+  ];
+
+  async function runAllTests(ref) {
+    setRunning(true);
+    const newResults = [];
+    for (const test of tests) {
+      newResults.push({ id: test.id, name: test.name, status: 'running', detail: '' });
+      setResults([...newResults]);
+      try {
+        const result = test.id === 'patient' ? await test.run(ref || '0000') : await test.run();
+        const idx = newResults.length - 1;
+        if (result.success) {
+          newResults[idx] = { ...newResults[idx], status: 'pass', detail: test.format(result.data) };
+        } else {
+          newResults[idx] = { ...newResults[idx], status: 'fail', detail: result.error };
+        }
+      } catch (err) {
+        const idx = newResults.length - 1;
+        newResults[idx] = { ...newResults[idx], status: 'fail', detail: err.message };
+      }
+      setResults([...newResults]);
+    }
+    setRunning(false);
+  }
+
+  function handleStart() {
+    setShowRefPrompt(true);
+  }
+
+  function handleRunWithRef() {
+    setShowRefPrompt(false);
+    runAllTests(patientRef);
+  }
+
+  return (
+    <div>
+      {!showRefPrompt ? (
+        <button
+          onClick={handleStart}
+          disabled={running}
+          className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-medium
+                     hover:bg-slate-200 transition-colors disabled:opacity-50"
+        >
+          {running ? 'Running...' : 'Run Diagnostics'}
+        </button>
+      ) : (
+        <div className="flex items-end gap-2 mb-3">
+          <div>
+            <label className="block text-xs text-slate-500 mb-1">Patient ref # for test (optional)</label>
+            <input
+              type="text"
+              value={patientRef}
+              onChange={(e) => setPatientRef(e.target.value)}
+              placeholder="e.g. 1214"
+              className="px-3 py-1.5 border border-slate-300 rounded-lg text-sm w-36
+                         focus:outline-none focus:ring-1 focus:ring-brand-500"
+            />
+          </div>
+          <button onClick={handleRunWithRef}
+            className="px-4 py-1.5 bg-brand-700 text-white rounded-lg text-sm font-medium
+                       hover:bg-brand-800 transition-colors">
+            Run
+          </button>
+          <button onClick={() => setShowRefPrompt(false)}
+            className="px-3 py-1.5 bg-slate-100 text-slate-500 rounded-lg text-sm hover:bg-slate-200">
+            Cancel
+          </button>
+        </div>
+      )}
+
+      {results.length > 0 && (
+        <table className="w-full mt-3 text-sm">
+          <thead>
+            <tr className="border-b border-slate-200">
+              <th className="text-left py-1.5 text-xs font-medium text-slate-500 uppercase">Test</th>
+              <th className="text-center py-1.5 text-xs font-medium text-slate-500 uppercase w-16">Status</th>
+              <th className="text-left py-1.5 text-xs font-medium text-slate-500 uppercase">Detail</th>
+            </tr>
+          </thead>
+          <tbody>
+            {results.map((r) => (
+              <tr key={r.id} className="border-b border-slate-100">
+                <td className="py-2 text-slate-700">{r.name}</td>
+                <td className="py-2 text-center">
+                  {r.status === 'running' && (
+                    <span className="inline-block w-4 h-4 border-2 border-slate-300 border-t-brand-500 rounded-full animate-spin" />
+                  )}
+                  {r.status === 'pass' && (
+                    <span className="text-green-600 font-semibold">Pass</span>
+                  )}
+                  {r.status === 'fail' && (
+                    <span className="text-red-600 font-semibold">Fail</span>
+                  )}
+                </td>
+                <td className="py-2 text-xs text-slate-500 break-all">{r.detail}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+}
 
 const SHARDS = [
   { value: 'au1', label: 'AU1 (Australia)' },
@@ -401,6 +518,12 @@ export default function Settings({ onBack, isFirstTime }) {
                          focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
             />
           </div>
+        </section>
+
+        {/* Diagnostics */}
+        <section className="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+          <h3 className="text-base font-semibold text-slate-800 mb-4">Diagnostics</h3>
+          <DiagnosticsPanel />
         </section>
 
         {/* Security */}
