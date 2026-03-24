@@ -179,8 +179,8 @@ class ClinikoAPI {
     }
   }
 
-  async getPresignedPost() {
-    return this._get('patient_attachments/presigned_post');
+  async getPresignedPost(patientId) {
+    return this._get(`patients/${patientId}/attachment_presigned_post`);
   }
 
   async createPatientAttachment(patientId, uploadUrl, description) {
