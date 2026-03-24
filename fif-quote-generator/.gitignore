@@ -1,0 +1,10 @@
+node_modules/
+dist/
+out/
+*.log
+.DS_Store
+Thumbs.db
+
+# Built renderer files
+src/renderer/bundle.js
+src/renderer/styles/output.css
