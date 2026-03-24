@@ -241,6 +241,7 @@ body {
   text-transform: uppercase;
   line-height: 1;
   text-align: right;
+  margin-top: 6mm;
 }
 
 /* ── PARTICIPANT INFO ── */
@@ -348,9 +349,8 @@ body {
 /* ── FOOTER ── */
 .footer {
   text-align: center;
-  padding-top: 18px;
+  padding-top: 12px;
   margin-top: auto;
-  border-top: 2px solid #e88c2a;
   font-size: 7.5pt;
   line-height: 1.8;
   color: #333;
@@ -359,11 +359,6 @@ body {
 .footer-separator { color: #333; font-weight: 400; }
 .footer-abn { font-weight: 600; color: #333; font-size: 8pt; }
 .footer-line { font-size: 7.5pt; color: #555; }
-
-@media print {
-  body { margin: 0; }
-  .page { padding: 0; min-height: auto; }
-}
 </style>
 </head>
 <body>
