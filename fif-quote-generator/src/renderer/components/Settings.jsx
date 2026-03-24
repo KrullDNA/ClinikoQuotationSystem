@@ -280,7 +280,13 @@ export default function Settings({ onBack, isFirstTime }) {
       });
 
       setSaveStatus('success');
-      setTimeout(() => setSaveStatus(null), 3000);
+
+      // On first-time setup, navigate to main app after short delay
+      if (isFirstTime) {
+        setTimeout(() => onBack(), 800);
+      } else {
+        setTimeout(() => setSaveStatus(null), 3000);
+      }
     } catch (err) {
       setSaveStatus('error');
     }
