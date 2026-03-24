@@ -164,7 +164,10 @@ ipcMain.handle('open-preview', async (_event, pdfPath, quoteData) => {
       pdfPath,
       quoteNumber: quoteData.quoteNumber,
       date: quoteData.date,
-      patientId: quoteData.patient ? quoteData.patient.internalId : null
+      patientId: quoteData.patient ? quoteData.patient.internalId : null,
+      patientName: quoteData.patient ? quoteData.patient.fullName : '',
+      patientLastName: quoteData.patient ? (quoteData.patient.fullName || '').split(' ').pop() : '',
+      shard: config.getShard()
     };
 
     previewWindow.loadFile(path.join(__dirname, '..', 'renderer', 'preview.html'));
@@ -216,16 +219,24 @@ ipcMain.handle('close-preview', async (event) => {
   }
 });
 
-// Upload to Cliniko
-ipcMain.handle('upload-to-cliniko', async (_event, patientId, filePath, quoteNumber, date) => {
+// Upload to Cliniko — Step 1: Get presigned post URL
+ipcMain.handle('upload-step1-presigned', async () => {
   try {
-    // Step 1: Get presigned post
     const presigned = await clinikoAPI.getPresignedPost();
+    return { success: true, data: presigned };
+  } catch (error) {
+    return {
+      success: false,
+      error: 'Could not connect to Cliniko. Please check your internet connection and try again.'
+    };
+  }
+});
 
-    // Step 2: Upload to S3
-    const fs = require('fs');
-    const FormData = require('form-data');
+// Upload to Cliniko — Step 2: Upload file to S3
+ipcMain.handle('upload-step2-s3', async (_event, presigned, filePath, quoteNumber) => {
+  try {
     const axios = require('axios');
+    const FormData = require('form-data');
 
     const form = new FormData();
     const fields = presigned.fields || {};
@@ -241,30 +252,57 @@ ipcMain.handle('upload-to-cliniko', async (_event, patientId, filePath, quoteNum
       headers: form.getHeaders()
     });
 
-    // Extract key from S3 response
-    const s3Key = uploadResponse.data.match(/<Key>(.*?)<\/Key>/)?.[1];
+    // Extract key from S3 response XML
+    const responseBody = typeof uploadResponse.data === 'string'
+      ? uploadResponse.data
+      : String(uploadResponse.data);
+    const s3Key = responseBody.match(/<Key>(.*?)<\/Key>/)?.[1];
     if (!s3Key) throw new Error('Failed to get upload key from S3');
 
     const uploadUrl = `${presigned.url}/${s3Key}`;
-
-    // Step 3: Create attachment record
-    const attachment = await clinikoAPI.createPatientAttachment(
-      patientId,
-      uploadUrl,
-      `Quote ${quoteNumber} - ${date}`
-    );
-
-    return { success: true, data: attachment };
+    return { success: true, data: { s3Key, uploadUrl } };
   } catch (error) {
-    return { success: false, error: error.message };
+    return {
+      success: false,
+      error: 'File upload failed. Please try again. If the problem persists, save a local copy instead.'
+    };
   }
 });
 
-// Save local copy
-ipcMain.handle('save-local-copy', async (_event, filePath) => {
+// Upload to Cliniko — Step 3: Create attachment record
+ipcMain.handle('upload-step3-attach', async (_event, patientId, uploadUrl, quoteNumber, date, s3Key) => {
   try {
-    const result = await dialog.showSaveDialog(mainWindow, {
-      defaultPath: path.basename(filePath),
+    const description = `Quote ${quoteNumber} \u2014 ${date}`;
+    const attachment = await clinikoAPI.createPatientAttachment(
+      patientId,
+      uploadUrl,
+      description
+    );
+    return { success: true, data: attachment };
+  } catch (error) {
+    return {
+      success: false,
+      error: `The file was uploaded but could not be linked to the patient record. Please contact support.\nFile reference: ${s3Key || 'unknown'}`
+    };
+  }
+});
+
+// Save local copy — with smart default filename and Documents folder
+ipcMain.handle('save-local-copy', async (_event, filePath, quoteNumber, patientLastName) => {
+  try {
+    const safeName = [
+      'Quote',
+      (quoteNumber || '').replace(/[^a-zA-Z0-9_-]/g, '_'),
+      (patientLastName || '').replace(/[^a-zA-Z0-9_-]/g, '_')
+    ].filter(Boolean).join('-') + '.pdf';
+
+    const documentsDir = app.getPath('documents');
+    const defaultPath = path.join(documentsDir, safeName);
+
+    // Use the preview window as parent if available, otherwise main
+    const parentWin = previewWindow && !previewWindow.isDestroyed() ? previewWindow : mainWindow;
+    const result = await dialog.showSaveDialog(parentWin, {
+      defaultPath,
       filters: [{ name: 'PDF Files', extensions: ['pdf'] }]
     });
 
@@ -272,7 +310,6 @@ ipcMain.handle('save-local-copy', async (_event, filePath) => {
       return { success: false, error: 'Save cancelled' };
     }
 
-    const fs = require('fs');
     fs.copyFileSync(filePath, result.filePath);
     return { success: true, data: result.filePath };
   } catch (error) {
@@ -280,15 +317,31 @@ ipcMain.handle('save-local-copy', async (_event, filePath) => {
   }
 });
 
-// Print quote
+// Print quote — load PDF as data URL in hidden window and print
 ipcMain.handle('print-quote', async (_event, filePath) => {
   try {
-    const printWindow = new BrowserWindow({ show: false });
-    await printWindow.loadFile(filePath);
-    printWindow.webContents.print({}, (success) => {
-      printWindow.close();
+    const pdfData = fs.readFileSync(filePath);
+    const dataUrl = `data:application/pdf;base64,${pdfData.toString('base64')}`;
+
+    const printWindow = new BrowserWindow({
+      show: false,
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true
+      }
     });
-    return { success: true };
+    await printWindow.loadURL(dataUrl);
+
+    return new Promise((resolve) => {
+      printWindow.webContents.print({}, (success, failureReason) => {
+        printWindow.destroy();
+        if (success) {
+          resolve({ success: true });
+        } else {
+          resolve({ success: false, error: failureReason || 'Print cancelled' });
+        }
+      });
+    });
   } catch (error) {
     return { success: false, error: error.message };
   }
@@ -435,6 +488,35 @@ ipcMain.handle('get-logo-data', async () => {
 ipcMain.handle('get-lockout-status', async () => {
   try {
     return { success: true, data: config.getLockoutStatus() };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Open URL in default system browser
+ipcMain.handle('open-external', async (_event, url) => {
+  try {
+    const { shell } = require('electron');
+    await shell.openExternal(url);
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Notify main window to reset for a new quote (called from preview window)
+ipcMain.handle('create-another-quote', async (event) => {
+  try {
+    // Close the preview window
+    const win = BrowserWindow.fromWebContents(event.sender);
+    if (win && !win.isDestroyed()) {
+      win.close();
+    }
+    // Tell main window to reset
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('reset-for-new-quote');
+    }
+    return { success: true };
   } catch (error) {
     return { success: false, error: error.message };
   }

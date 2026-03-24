@@ -99,5 +99,11 @@ contextBridge.exposeInMainWorld('api', {
     ipcRenderer.invoke('get-cached-data'),
 
   refreshData: () =>
-    ipcRenderer.invoke('refresh-data')
+    ipcRenderer.invoke('refresh-data'),
+
+  // Listen for reset event from main process (triggered by preview window)
+  onResetForNewQuote: (callback) => {
+    ipcRenderer.on('reset-for-new-quote', callback);
+    return () => ipcRenderer.removeListener('reset-for-new-quote', callback);
+  }
 });

@@ -15,8 +15,9 @@
       overflow: hidden;
     }
 
+    /* ── Toolbar ── */
     .toolbar {
-      background: #ffffff;
+      background: #fff;
       border-bottom: 1px solid #e2e8f0;
       padding: 10px 16px;
       display: flex;
@@ -24,151 +25,156 @@
       justify-content: space-between;
       flex-shrink: 0;
     }
-
-    .toolbar-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .toolbar-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: #334155;
-    }
-
-    .toolbar-right {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    .toolbar-left { display: flex; align-items: center; gap: 8px; }
+    .toolbar-title { font-size: 14px; font-weight: 600; color: #334155; }
+    .toolbar-right { display: flex; align-items: center; gap: 8px; }
 
     .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 7px 14px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      border: 1px solid #e2e8f0;
-      background: #ffffff;
-      color: #475569;
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 500;
+      cursor: pointer; border: 1px solid #e2e8f0; background: #fff; color: #475569;
       transition: all 0.15s ease;
     }
     .btn:hover { background: #f8fafc; border-color: #cbd5e1; }
-    .btn:active { background: #f1f5f9; }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    .btn-primary {
-      background: #2C3E50;
-      color: #ffffff;
-      border-color: #2C3E50;
-    }
-    .btn-primary:hover { background: #1a252f; border-color: #1a252f; }
-
-    .btn-back {
-      background: #f8fafc;
-      color: #64748b;
-    }
+    .btn-primary { background: #2C3E50; color: #fff; border-color: #2C3E50; }
+    .btn-primary:hover { background: #1a252f; }
+    .btn-back { background: #f8fafc; color: #64748b; }
     .btn-back:hover { background: #f1f5f9; color: #475569; }
+    .btn-success { background: #16a34a; color: #fff; border-color: #16a34a; }
+    .btn-success:hover { background: #15803d; }
+    .btn-icon { width: 16px; height: 16px; flex-shrink: 0; }
 
-    .btn-icon {
-      width: 16px;
-      height: 16px;
-      flex-shrink: 0;
-    }
+    /* ── PDF viewer ── */
+    .pdf-viewer { flex: 1; overflow: hidden; display: flex; align-items: stretch; }
+    .pdf-viewer iframe { width: 100%; height: 100%; border: none; }
 
-    .pdf-viewer {
-      flex: 1;
-      overflow: hidden;
-      padding: 0;
-      display: flex;
-      align-items: stretch;
-      justify-content: center;
-    }
-
-    .pdf-viewer iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-
+    /* ── Loading spinner ── */
     .loading {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 8px;
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 8px;
     }
-
     .loading-spinner {
-      width: 28px;
-      height: 28px;
-      border: 3px solid #e2e8f0;
-      border-top-color: #2C3E50;
-      border-radius: 50%;
+      width: 28px; height: 28px; border: 3px solid #e2e8f0;
+      border-top-color: #2C3E50; border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
-
     @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 13px; color: #94a3b8; }
 
-    .loading-text {
-      font-size: 13px;
-      color: #94a3b8;
-    }
-
+    /* ── Status message ── */
     .status-msg {
-      font-size: 12px;
-      padding: 4px 10px;
-      border-radius: 6px;
-      display: none;
+      font-size: 12px; padding: 4px 10px; border-radius: 6px; display: none;
     }
     .status-msg.success {
-      display: inline-block;
-      background: #f0fdf4;
-      color: #166534;
-      border: 1px solid #bbf7d0;
+      display: inline-block; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0;
     }
     .status-msg.error {
-      display: inline-block;
-      background: #fef2f2;
-      color: #991b1b;
-      border: 1px solid #fecaca;
+      display: inline-block; background: #fef2f2; color: #991b1b; border: 1px solid #fecaca;
     }
+
+    /* ── Modal overlay ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+      display: none; align-items: center; justify-content: center; z-index: 100;
+    }
+    .modal-overlay.visible { display: flex; }
+    .modal {
+      background: #fff; border-radius: 16px; padding: 32px;
+      width: 420px; max-width: 90vw; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .modal-title {
+      font-size: 16px; font-weight: 600; color: #1e293b; margin-bottom: 20px;
+      text-align: center;
+    }
+
+    /* ── Upload progress steps ── */
+    .upload-steps { margin-bottom: 20px; }
+    .upload-step {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 0; border-bottom: 1px solid #f1f5f9;
+    }
+    .upload-step:last-child { border-bottom: none; }
+    .step-indicator {
+      width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 600;
+    }
+    .step-pending .step-indicator {
+      background: #f1f5f9; color: #94a3b8;
+    }
+    .step-active .step-indicator {
+      background: #dbeafe; color: #2563eb;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .step-done .step-indicator {
+      background: #dcfce7; color: #16a34a;
+    }
+    .step-error .step-indicator {
+      background: #fef2f2; color: #dc2626;
+    }
+    .step-label { font-size: 13px; color: #475569; }
+    .step-active .step-label { color: #1e293b; font-weight: 500; }
+    .step-done .step-label { color: #16a34a; }
+    .step-error .step-label { color: #dc2626; }
+
+    /* ── Error message in modal ── */
+    .modal-error {
+      background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px;
+      padding: 12px; margin-bottom: 16px; font-size: 12px; color: #991b1b;
+      line-height: 1.5; white-space: pre-wrap;
+    }
+
+    /* ── Success screen ── */
+    .success-icon {
+      width: 56px; height: 56px; border-radius: 50%; background: #dcfce7;
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;
+    }
+    .success-icon svg { width: 28px; height: 28px; color: #16a34a; }
+    .success-message {
+      text-align: center; font-size: 14px; color: #334155; margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    .success-buttons {
+      display: flex; gap: 10px; justify-content: center;
+    }
+    .success-buttons .btn { flex: 1; justify-content: center; }
   </style>
 </head>
 <body>
-  <div class="toolbar">
+  <!-- Toolbar -->
+  <div class="toolbar" id="toolbar">
     <div class="toolbar-left">
       <span class="toolbar-title" id="toolbar-title">Quote Preview</span>
       <span class="status-msg" id="status-msg"></span>
     </div>
     <div class="toolbar-right">
-      <button class="btn btn-primary" id="btn-upload" title="Upload to Cliniko patient file">
+      <button class="btn btn-primary" id="btn-upload">
         <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
         </svg>
         Upload to Cliniko
       </button>
-      <button class="btn" id="btn-save" title="Save a local copy">
+      <button class="btn" id="btn-save">
         <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
         </svg>
         Save Local Copy
       </button>
-      <button class="btn" id="btn-print" title="Print this quote">
+      <button class="btn" id="btn-print">
         <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
         </svg>
         Print
       </button>
-      <button class="btn btn-back" id="btn-back" title="Return to editing">
+      <button class="btn btn-back" id="btn-back">
         <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M11 17l-5-5m0 0l5-5m-5 5h12"/>
@@ -178,18 +184,67 @@
     </div>
   </div>
 
+  <!-- Loading -->
   <div class="loading" id="loading">
     <div class="loading-spinner"></div>
     <div class="loading-text">Loading preview...</div>
   </div>
 
+  <!-- PDF Viewer -->
   <div class="pdf-viewer" id="pdf-viewer" style="display:none;">
     <iframe id="pdf-frame"></iframe>
+  </div>
+
+  <!-- Upload Progress Modal -->
+  <div class="modal-overlay" id="upload-modal">
+    <div class="modal">
+      <div class="modal-title" id="modal-title">Uploading to Cliniko</div>
+
+      <!-- Progress Steps -->
+      <div class="upload-steps" id="upload-steps">
+        <div class="upload-step step-pending" id="step1">
+          <div class="step-indicator">1</div>
+          <div class="step-label">Preparing upload...</div>
+        </div>
+        <div class="upload-step step-pending" id="step2">
+          <div class="step-indicator">2</div>
+          <div class="step-label">Uploading file...</div>
+        </div>
+        <div class="upload-step step-pending" id="step3">
+          <div class="step-indicator">3</div>
+          <div class="step-label">Linking to patient file...</div>
+        </div>
+      </div>
+
+      <!-- Error (hidden by default) -->
+      <div class="modal-error" id="modal-error" style="display:none;"></div>
+
+      <!-- Error buttons (hidden by default) -->
+      <div id="error-buttons" style="display:none; text-align:center;">
+        <button class="btn" id="btn-retry-upload">Try Again</button>
+        <button class="btn btn-back" id="btn-close-modal" style="margin-left:8px;">Close</button>
+      </div>
+
+      <!-- Success screen (hidden by default) -->
+      <div id="success-screen" style="display:none;">
+        <div class="success-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+        </div>
+        <div class="success-message" id="success-message"></div>
+        <div class="success-buttons">
+          <button class="btn btn-success" id="btn-create-another">Create Another Quote</button>
+          <button class="btn" id="btn-view-cliniko">View in Cliniko</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
     let previewData = null;
 
+    // ── Init ──
     async function init() {
       try {
         const result = await window.previewApi.getPreviewData();
@@ -199,13 +254,12 @@
         }
         previewData = result.data;
 
-        // Update title
         document.getElementById('toolbar-title').textContent =
-          'Quote Preview — ' + (previewData.quoteNumber || 'Quote');
+          'Quote Preview \u2014 ' + (previewData.quoteNumber || 'Quote');
 
         // Embed PDF
-        const pdfFrame = document.getElementById('pdf-frame');
-        pdfFrame.src = 'data:application/pdf;base64,' + previewData.pdfBase64;
+        document.getElementById('pdf-frame').src =
+          'data:application/pdf;base64,' + previewData.pdfBase64;
 
         document.getElementById('loading').style.display = 'none';
         document.getElementById('pdf-viewer').style.display = 'flex';
@@ -228,40 +282,126 @@
       }
     }
 
-    function setButtonLoading(btn, loading) {
-      btn.disabled = loading;
+    // ── Upload to Cliniko (3-step) ──
+    function setStepState(stepNum, state) {
+      const el = document.getElementById('step' + stepNum);
+      el.className = 'upload-step step-' + state;
+      const indicator = el.querySelector('.step-indicator');
+      if (state === 'done') {
+        indicator.innerHTML = '<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>';
+      } else if (state === 'error') {
+        indicator.innerHTML = '<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg>';
+      } else if (state === 'active') {
+        indicator.innerHTML = '<div style="width:14px;height:14px;border:2px solid #2563eb;border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite;"></div>';
+      }
     }
 
-    // Upload to Cliniko
-    document.getElementById('btn-upload').addEventListener('click', async () => {
-      if (!previewData || !previewData.patientId) return;
-      const btn = document.getElementById('btn-upload');
-      setButtonLoading(btn, true);
-      try {
-        const result = await window.previewApi.uploadToCliniko(
-          previewData.patientId,
-          previewData.pdfPath,
-          previewData.quoteNumber,
-          previewData.date
-        );
-        if (result.success) {
-          showStatus('Uploaded to Cliniko successfully', 'success');
-        } else {
-          showStatus('Upload failed: ' + (result.error || 'Unknown error'), 'error');
-        }
-      } catch (err) {
-        showStatus('Upload error: ' + err.message, 'error');
+    function resetUploadModal() {
+      for (let i = 1; i <= 3; i++) {
+        const el = document.getElementById('step' + i);
+        el.className = 'upload-step step-pending';
+        el.querySelector('.step-indicator').textContent = String(i);
       }
-      setButtonLoading(btn, false);
+      document.getElementById('upload-steps').style.display = '';
+      document.getElementById('modal-title').textContent = 'Uploading to Cliniko';
+      document.getElementById('modal-error').style.display = 'none';
+      document.getElementById('error-buttons').style.display = 'none';
+      document.getElementById('success-screen').style.display = 'none';
+    }
+
+    function showUploadError(errorMsg) {
+      document.getElementById('modal-error').textContent = errorMsg;
+      document.getElementById('modal-error').style.display = '';
+      document.getElementById('error-buttons').style.display = '';
+    }
+
+    async function startUpload() {
+      if (!previewData || !previewData.patientId) return;
+
+      resetUploadModal();
+      document.getElementById('upload-modal').classList.add('visible');
+
+      // Step 1: Get presigned URL
+      setStepState(1, 'active');
+      const step1 = await window.previewApi.uploadStep1Presigned();
+      if (!step1.success) {
+        setStepState(1, 'error');
+        showUploadError(step1.error);
+        return;
+      }
+      setStepState(1, 'done');
+
+      // Step 2: Upload to S3
+      setStepState(2, 'active');
+      const step2 = await window.previewApi.uploadStep2S3(
+        step1.data,
+        previewData.pdfPath,
+        previewData.quoteNumber
+      );
+      if (!step2.success) {
+        setStepState(2, 'error');
+        showUploadError(step2.error);
+        return;
+      }
+      setStepState(2, 'done');
+
+      // Step 3: Create attachment record
+      setStepState(3, 'active');
+      const step3 = await window.previewApi.uploadStep3Attach(
+        previewData.patientId,
+        step2.data.uploadUrl,
+        previewData.quoteNumber,
+        previewData.date,
+        step2.data.s3Key
+      );
+      if (!step3.success) {
+        setStepState(3, 'error');
+        showUploadError(step3.error);
+        return;
+      }
+      setStepState(3, 'done');
+
+      // Show success screen
+      document.getElementById('upload-steps').style.display = 'none';
+      document.getElementById('modal-title').textContent = 'Upload Complete';
+      document.getElementById('success-message').textContent =
+        'Quote ' + previewData.quoteNumber + ' uploaded to ' +
+        (previewData.patientName || 'patient') + '\u2019s file in Cliniko.';
+      document.getElementById('success-screen').style.display = '';
+    }
+
+    // ── Event listeners ──
+    document.getElementById('btn-upload').addEventListener('click', startUpload);
+
+    document.getElementById('btn-retry-upload').addEventListener('click', startUpload);
+
+    document.getElementById('btn-close-modal').addEventListener('click', () => {
+      document.getElementById('upload-modal').classList.remove('visible');
+    });
+
+    document.getElementById('btn-create-another').addEventListener('click', async () => {
+      await window.previewApi.createAnotherQuote();
+    });
+
+    document.getElementById('btn-view-cliniko').addEventListener('click', async () => {
+      if (!previewData) return;
+      const shard = previewData.shard || 'au1';
+      const patientId = previewData.patientId;
+      const url = 'https://app.' + shard + '.cliniko.com/patients/' + patientId;
+      await window.previewApi.openExternal(url);
     });
 
     // Save local copy
     document.getElementById('btn-save').addEventListener('click', async () => {
       if (!previewData) return;
       const btn = document.getElementById('btn-save');
-      setButtonLoading(btn, true);
+      btn.disabled = true;
       try {
-        const result = await window.previewApi.saveLocalCopy(previewData.pdfPath);
+        const result = await window.previewApi.saveLocalCopy(
+          previewData.pdfPath,
+          previewData.quoteNumber,
+          previewData.patientLastName
+        );
         if (result.success) {
           showStatus('Saved to: ' + result.data, 'success');
         } else if (result.error !== 'Save cancelled') {
@@ -270,21 +410,25 @@
       } catch (err) {
         showStatus('Save error: ' + err.message, 'error');
       }
-      setButtonLoading(btn, false);
+      btn.disabled = false;
     });
 
     // Print
     document.getElementById('btn-print').addEventListener('click', async () => {
       if (!previewData) return;
       const btn = document.getElementById('btn-print');
-      setButtonLoading(btn, true);
+      btn.disabled = true;
       try {
-        await window.previewApi.printQuote(previewData.pdfPath);
-        showStatus('Print job sent', 'success');
+        const result = await window.previewApi.printQuote(previewData.pdfPath);
+        if (result.success) {
+          showStatus('Print job sent', 'success');
+        } else if (result.error && result.error !== 'Print cancelled') {
+          showStatus('Print: ' + result.error, 'error');
+        }
       } catch (err) {
         showStatus('Print error: ' + err.message, 'error');
       }
-      setButtonLoading(btn, false);
+      btn.disabled = false;
     });
 
     // Back to edit

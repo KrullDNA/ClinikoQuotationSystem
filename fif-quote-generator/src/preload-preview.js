@@ -1,21 +1,39 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
-// Minimal preload for the PDF preview window.
-// Only exposes the functions needed by the preview.
+// Preload for the PDF preview window.
+// Exposes functions needed for preview, upload, save, print.
 
 contextBridge.exposeInMainWorld('previewApi', {
   getPreviewData: () =>
     ipcRenderer.invoke('get-preview-data'),
 
-  uploadToCliniko: (patientId, filePath, quoteNumber, date) =>
-    ipcRenderer.invoke('upload-to-cliniko', patientId, filePath, quoteNumber, date),
+  // 3-step upload flow
+  uploadStep1Presigned: () =>
+    ipcRenderer.invoke('upload-step1-presigned'),
 
-  saveLocalCopy: (filePath) =>
-    ipcRenderer.invoke('save-local-copy', filePath),
+  uploadStep2S3: (presigned, filePath, quoteNumber) =>
+    ipcRenderer.invoke('upload-step2-s3', presigned, filePath, quoteNumber),
 
+  uploadStep3Attach: (patientId, uploadUrl, quoteNumber, date, s3Key) =>
+    ipcRenderer.invoke('upload-step3-attach', patientId, uploadUrl, quoteNumber, date, s3Key),
+
+  // Save local copy
+  saveLocalCopy: (filePath, quoteNumber, patientLastName) =>
+    ipcRenderer.invoke('save-local-copy', filePath, quoteNumber, patientLastName),
+
+  // Print
   printQuote: (filePath) =>
     ipcRenderer.invoke('print-quote', filePath),
 
+  // Close preview window
   closePreview: () =>
-    ipcRenderer.invoke('close-preview')
+    ipcRenderer.invoke('close-preview'),
+
+  // Open URL in system browser
+  openExternal: (url) =>
+    ipcRenderer.invoke('open-external', url),
+
+  // Reset main app for new quote
+  createAnotherQuote: () =>
+    ipcRenderer.invoke('create-another-quote')
 });

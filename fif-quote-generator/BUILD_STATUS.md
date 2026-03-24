@@ -7,8 +7,8 @@
 | 3       | Patient Lookup + Display             | **Complete**   | No deviations. |
 | 4       | Line Items Table                     | **Complete**   | No deviations. |
 | 5       | PDF Generation                       | **Complete**   | Used Electron printToPDF instead of puppeteer-core (see notes). |
-| 6       | Upload + Save + Print                | Ready to Start | — |
-| 7       | Polish + Packaging + Testing         | Not Started    | — |
+| 6       | Upload + Save + Print                | **Complete**   | No deviations. |
+| 7       | Polish + Packaging + Testing         | Ready to Start | — |
 
 ## Session 1 Notes
 
@@ -119,3 +119,41 @@
   in hidden BrowserWindow → printToPDF → save to temp dir → open preview window
 - Loading state: "Generating..." spinner on button while PDF is being created
 - QuoteBuilder passes generating prop to disable button during generation
+
+## Session 6 Notes
+
+- Upload to Cliniko: 3-step process with per-step progress UI
+  - Step 1: GET presigned post URL from Cliniko API
+  - Step 2: POST file to S3 with all presigned fields, extract Key from XML response
+  - Step 3: POST patient_attachment record to Cliniko linking upload to patient
+  - Each step has a dedicated IPC handler (upload-step1-presigned, upload-step2-s3, upload-step3-attach)
+  - Modal overlay with step indicators: spinner while active, tick when done, X on error
+- Per-step error handling with clear user-facing messages:
+  - Step 1 fail: "Could not connect to Cliniko..."
+  - Step 2 fail: "File upload failed..."
+  - Step 3 fail: "File was uploaded but could not be linked... File reference: {s3Key}"
+  - Retry button re-runs the full upload from step 1
+- Upload success screen:
+  - Green tick icon
+  - "Quote {number} uploaded to {patient_name}'s file in Cliniko."
+  - "Create Another Quote" button: closes preview, resets all form state
+  - "View in Cliniko" button: opens patient page in system browser
+    (https://app.{shard}.cliniko.com/patients/{internal_id})
+- Save Local Copy:
+  - Default filename: "Quote-{quoteNumber}-{lastName}.pdf"
+  - Default location: user's Documents folder
+  - Save dialog parented to preview window
+  - Confirmation: "Saved to: {path}"
+- Print:
+  - Loads PDF as base64 data URL in hidden BrowserWindow
+  - Uses webContents.print() with success/failure callback
+- Create Another Quote flow:
+  - Preview window sends IPC to main process
+  - Main process closes preview, sends 'reset-for-new-quote' event to main window
+  - Renderer listens via onResetForNewQuote callback
+  - Clears patient state, increments resetKey to force QuoteBuilder remount
+  - All line items, notes, terms, validity reset to defaults
+  - Patient lookup input cleared, app ready for next quote
+- patient_id uses internal Cliniko ID (not old_reference_id)
+- quote description format: "Quote {number} — {date}"
+- shell.openExternal for "View in Cliniko" link

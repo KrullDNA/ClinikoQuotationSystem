@@ -97,9 +97,27 @@ function App() {
     setPatient(parsed);
   }
 
+  // Reset key — incrementing this forces QuoteBuilder to remount and reset all state
+  const [resetKey, setResetKey] = useState(0);
+
   function handleClearPatient() {
     setPatient(null);
   }
+
+  function handleCreateAnotherQuote() {
+    // Purge ALL patient data
+    setPatient(null);
+    // Increment reset key to force QuoteBuilder full remount
+    setResetKey(prev => prev + 1);
+  }
+
+  // Listen for reset event from main process (when preview "Create Another Quote" is clicked)
+  useEffect(() => {
+    const cleanup = window.api.onResetForNewQuote(() => {
+      handleCreateAnotherQuote();
+    });
+    return cleanup;
+  }, []);
 
   const [generating, setGenerating] = useState(false);
 
@@ -229,6 +247,7 @@ function App() {
 
           {/* Quote Builder (line items, business, notes, etc.) */}
           <QuoteBuilder
+            key={resetKey}
             patient={patient}
             clinikoData={clinikoData}
             onGenerateQuote={handleGenerateQuote}
