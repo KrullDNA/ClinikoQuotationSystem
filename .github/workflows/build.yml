@@ -17,12 +17,10 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
-          cache-dependency-path: fif-quote-generator/package-lock.json
+          node-version: 22
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Build renderer
         run: npm run build:renderer
@@ -36,8 +34,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: windows-installer
-          path: |
-            fif-quote-generator/dist/*.exe
+          path: fif-quote-generator/dist/*.exe
           retention-days: 30
 
   build-mac:
@@ -51,12 +48,10 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
-          cache-dependency-path: fif-quote-generator/package-lock.json
+          node-version: 22
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Build renderer
         run: npm run build:renderer
@@ -70,6 +65,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: mac-installer
-          path: |
-            fif-quote-generator/dist/*.dmg
+          path: fif-quote-generator/dist/*.dmg
           retention-days: 30
