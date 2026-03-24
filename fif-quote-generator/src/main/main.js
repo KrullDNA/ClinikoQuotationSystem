@@ -287,7 +287,7 @@ ipcMain.handle('upload-step2-s3', async (_event, presigned, filePath, quoteNumbe
     const fields = presigned.fields || {};
     for (const [key, value] of Object.entries(fields)) {
       const fieldValue = typeof value === 'string'
-        ? value.replace('${filename}', `${quoteNumber}.pdf`)
+        ? value.replace('${filename}', `Quote ${quoteNumber}.pdf`)
         : value;
       form.append(key, fieldValue);
     }
@@ -335,11 +335,8 @@ ipcMain.handle('upload-step3-attach', async (_event, patientId, uploadUrl, quote
 // Save local copy — with smart default filename and Documents folder
 ipcMain.handle('save-local-copy', async (_event, filePath, quoteNumber, patientLastName) => {
   try {
-    const safeName = [
-      'Quote',
-      (quoteNumber || '').replace(/[^a-zA-Z0-9_-]/g, '_'),
-      (patientLastName || '').replace(/[^a-zA-Z0-9_-]/g, '_')
-    ].filter(Boolean).join('-') + '.pdf';
+    const safeQuoteNum = (quoteNumber || '').replace(/[^a-zA-Z0-9_-]/g, '_');
+    const safeName = `Quote ${safeQuoteNum}.pdf`;
 
     const documentsDir = app.getPath('documents');
     const defaultPath = path.join(documentsDir, safeName);
