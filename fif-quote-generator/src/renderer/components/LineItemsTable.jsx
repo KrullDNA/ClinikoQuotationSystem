@@ -4,61 +4,6 @@ function fmt(num) {
   return num.toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-function toggleBold(inputRef, currentValue, updateFn) {
-  const input = inputRef.current;
-  if (!input) return;
-  const start = input.selectionStart;
-  const end = input.selectionEnd;
-  const val = currentValue || '';
-
-  if (start !== end) {
-    // Text is selected — toggle bold on selection
-    const before = val.slice(0, start);
-    const selected = val.slice(start, end);
-    const after = val.slice(end);
-
-    if (selected.startsWith('**') && selected.endsWith('**') && selected.length > 4) {
-      // Remove bold from selection
-      const unbolded = selected.slice(2, -2);
-      updateFn(before + unbolded + after);
-    } else if (before.endsWith('**') && after.startsWith('**')) {
-      // Remove surrounding bold markers
-      updateFn(before.slice(0, -2) + selected + after.slice(2));
-    } else {
-      // Add bold
-      updateFn(before + '**' + selected + '**' + after);
-    }
-  } else {
-    // No selection — toggle bold on entire value
-    if (val.startsWith('**') && val.endsWith('**') && val.length > 4) {
-      updateFn(val.slice(2, -2));
-    } else {
-      updateFn('**' + val + '**');
-    }
-  }
-  // Re-focus the input after toggle
-  setTimeout(() => input.focus(), 0);
-}
-
-function BoldButton({ inputRef, value, onUpdate }) {
-  const isBold = value && value.startsWith('**') && value.endsWith('**') && value.length > 4;
-  return (
-    <button
-      type="button"
-      tabIndex={-1}
-      onClick={() => toggleBold(inputRef, value, onUpdate)}
-      className={`px-1.5 py-0.5 text-xs font-bold rounded border transition-colors mt-0.5
-        ${isBold
-          ? 'bg-brand-100 text-brand-700 border-brand-300'
-          : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100 hover:text-slate-600'
-        }`}
-      title="Toggle bold (select text first to bold part of it)"
-    >
-      B
-    </button>
-  );
-}
-
 function LineItemRow({ item, index, onChange, onDelete, onDragStart, onDragOver, onDragEnd, onDrop, isDragOver }) {
   const qty = item.qty || 1;
   const unitCost = item.unitCost || 0;
@@ -66,9 +11,6 @@ function LineItemRow({ item, index, onChange, onDelete, onDragStart, onDragOver,
   const subtotal = qty * unitCost;
   const gstAmount = subtotal * gstRate;
   const total = subtotal + gstAmount;
-
-  const itemCodeRef = useRef(null);
-  const descriptionRef = useRef(null);
 
   function update(field, value) {
     onChange(index, { ...item, [field]: value });
@@ -104,7 +46,6 @@ function LineItemRow({ item, index, onChange, onDelete, onDragStart, onDragOver,
       {/* Item Code + Category (editable) */}
       <td className="py-2 px-2 align-top">
         <input
-          ref={itemCodeRef}
           type="text"
           value={item.itemCode || ''}
           onChange={(e) => update('itemCode', e.target.value)}
@@ -112,25 +53,18 @@ function LineItemRow({ item, index, onChange, onDelete, onDragStart, onDragOver,
           className="w-full px-2 py-1 text-sm font-mono border border-slate-200 rounded
                      focus:outline-none focus:ring-1 focus:ring-brand-500 focus:border-brand-500"
         />
-        <div className="flex items-center justify-between mt-0.5">
-          <div className="text-xs text-slate-400">{item.category || ''}</div>
-          <BoldButton inputRef={itemCodeRef} value={item.itemCode} onUpdate={(v) => update('itemCode', v)} />
-        </div>
+        <div className="text-xs text-slate-400 mt-0.5">{item.category || ''}</div>
       </td>
 
       {/* Description (editable) */}
       <td className="py-2 px-2 align-top">
         <input
-          ref={descriptionRef}
           type="text"
           value={item.description}
           onChange={(e) => update('description', e.target.value)}
           className="w-full px-2 py-1 text-sm border border-slate-200 rounded
                      focus:outline-none focus:ring-1 focus:ring-brand-500 focus:border-brand-500"
         />
-        <div className="flex justify-end mt-0.5">
-          <BoldButton inputRef={descriptionRef} value={item.description} onUpdate={(v) => update('description', v)} />
-        </div>
       </td>
 
       {/* Qty (editable) */}
