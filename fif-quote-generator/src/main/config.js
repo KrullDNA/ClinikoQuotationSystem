@@ -22,6 +22,9 @@ function getStore() {
         default_terms: '',
         default_validity: '60 days',
         logo_path: '',
+        footer_address: '',
+        footer_email: '',
+        footer_website: '',
         lockout_until: 0,
         failed_pin_attempts: 0,
         quote_counter: 0,
@@ -40,6 +43,9 @@ function getConfig() {
     default_terms: s.get('default_terms'),
     default_validity: s.get('default_validity'),
     logo_path: s.get('logo_path'),
+    footer_address: s.get('footer_address'),
+    footer_email: s.get('footer_email'),
+    footer_website: s.get('footer_website'),
     quote_counter: s.get('quote_counter'),
     quote_prefix: s.get('quote_prefix')
   };
@@ -49,7 +55,8 @@ function saveConfig(config) {
   const s = getStore();
   const allowedKeys = [
     'shard', 'default_business_id', 'default_terms',
-    'default_validity', 'logo_path', 'quote_prefix'
+    'default_validity', 'logo_path', 'quote_prefix',
+    'footer_address', 'footer_email', 'footer_website'
   ];
   for (const key of allowedKeys) {
     if (config[key] !== undefined) {

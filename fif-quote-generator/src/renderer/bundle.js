@@ -21768,6 +21768,9 @@
     const [defaultValidity, setDefaultValidity] = (0, import_react3.useState)("30 days");
     const [defaultTerms, setDefaultTerms] = (0, import_react3.useState)("");
     const [logoData, setLogoData] = (0, import_react3.useState)(null);
+    const [footerAddress, setFooterAddress] = (0, import_react3.useState)("");
+    const [footerEmail, setFooterEmail] = (0, import_react3.useState)("");
+    const [footerWebsite, setFooterWebsite] = (0, import_react3.useState)("");
     const [showChangePin, setShowChangePin] = (0, import_react3.useState)(false);
     const [currentPin, setCurrentPin] = (0, import_react3.useState)("");
     const [newPin, setNewPin] = (0, import_react3.useState)("");
@@ -21789,6 +21792,9 @@
           setSelectedBusiness(cfg.default_business_id || "");
           setDefaultValidity(cfg.default_validity || "30 days");
           setDefaultTerms(cfg.default_terms || "");
+          setFooterAddress(cfg.footer_address || "");
+          setFooterEmail(cfg.footer_email || "");
+          setFooterWebsite(cfg.footer_website || "");
         }
         const hasKey = await window.api.hasApiKey();
         if (hasKey.success && hasKey.data) {
@@ -21880,7 +21886,10 @@
           shard,
           default_business_id: selectedBusiness,
           default_validity: defaultValidity,
-          default_terms: defaultTerms
+          default_terms: defaultTerms,
+          footer_address: footerAddress,
+          footer_email: footerEmail,
+          footer_website: footerWebsite
         });
         setSaveStatus("success");
         if (isFirstTime) {
@@ -22033,7 +22042,34 @@
         placeholder: "Enter default terms and conditions for quotes...",
         className: "w-full px-3 py-2 border border-slate-300 rounded-lg text-sm resize-y\n                         focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
       }
-    ))), /* @__PURE__ */ import_react3.default.createElement("section", { className: "bg-white rounded-xl border border-slate-200 p-6 mb-6" }, /* @__PURE__ */ import_react3.default.createElement("h3", { className: "text-base font-semibold text-slate-800 mb-4" }, "Diagnostics"), /* @__PURE__ */ import_react3.default.createElement(DiagnosticsPanel, null)), /* @__PURE__ */ import_react3.default.createElement("section", { className: "bg-white rounded-xl border border-slate-200 p-6 mb-6" }, /* @__PURE__ */ import_react3.default.createElement("h3", { className: "text-base font-semibold text-slate-800 mb-4" }, "Security"), !showChangePin ? /* @__PURE__ */ import_react3.default.createElement(
+    ))), /* @__PURE__ */ import_react3.default.createElement("section", { className: "bg-white rounded-xl border border-slate-200 p-6 mb-6" }, /* @__PURE__ */ import_react3.default.createElement("h3", { className: "text-base font-semibold text-slate-800 mb-1" }, "Company Details (PDF Footer)"), /* @__PURE__ */ import_react3.default.createElement("p", { className: "text-xs text-slate-400 mb-4" }, "These details appear at the bottom of every quote PDF."), /* @__PURE__ */ import_react3.default.createElement("div", { className: "mb-4" }, /* @__PURE__ */ import_react3.default.createElement("label", { className: "block text-sm font-medium text-slate-700 mb-1" }, "Address"), /* @__PURE__ */ import_react3.default.createElement(
+      "input",
+      {
+        type: "text",
+        value: footerAddress,
+        onChange: (e) => setFooterAddress(e.target.value),
+        placeholder: "e.g. 123 Smith St, Melbourne VIC 3000",
+        className: "w-full px-3 py-2 border border-slate-300 rounded-lg text-sm\n                         focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+      }
+    )), /* @__PURE__ */ import_react3.default.createElement("div", { className: "grid grid-cols-2 gap-4" }, /* @__PURE__ */ import_react3.default.createElement("div", null, /* @__PURE__ */ import_react3.default.createElement("label", { className: "block text-sm font-medium text-slate-700 mb-1" }, "Email"), /* @__PURE__ */ import_react3.default.createElement(
+      "input",
+      {
+        type: "email",
+        value: footerEmail,
+        onChange: (e) => setFooterEmail(e.target.value),
+        placeholder: "e.g. info@example.com.au",
+        className: "w-full px-3 py-2 border border-slate-300 rounded-lg text-sm\n                           focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+      }
+    )), /* @__PURE__ */ import_react3.default.createElement("div", null, /* @__PURE__ */ import_react3.default.createElement("label", { className: "block text-sm font-medium text-slate-700 mb-1" }, "Website"), /* @__PURE__ */ import_react3.default.createElement(
+      "input",
+      {
+        type: "text",
+        value: footerWebsite,
+        onChange: (e) => setFooterWebsite(e.target.value),
+        placeholder: "e.g. feetinfocus.com.au",
+        className: "w-full px-3 py-2 border border-slate-300 rounded-lg text-sm\n                           focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+      }
+    )))), /* @__PURE__ */ import_react3.default.createElement("section", { className: "bg-white rounded-xl border border-slate-200 p-6 mb-6" }, /* @__PURE__ */ import_react3.default.createElement("h3", { className: "text-base font-semibold text-slate-800 mb-4" }, "Diagnostics"), /* @__PURE__ */ import_react3.default.createElement(DiagnosticsPanel, null)), /* @__PURE__ */ import_react3.default.createElement("section", { className: "bg-white rounded-xl border border-slate-200 p-6 mb-6" }, /* @__PURE__ */ import_react3.default.createElement("h3", { className: "text-base font-semibold text-slate-800 mb-4" }, "Security"), !showChangePin ? /* @__PURE__ */ import_react3.default.createElement(
       "button",
       {
         onClick: () => setShowChangePin(true),
