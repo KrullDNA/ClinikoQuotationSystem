@@ -110,6 +110,8 @@ class PDFGenerator {
     // Build business footer from config settings
     const cfg = config.getConfig();
     const footerAddress = cfg.footer_address || '';
+    const footerPhone = cfg.footer_phone || '';
+    const footerFax = cfg.footer_fax || '';
     const footerEmail = cfg.footer_email || '';
     const footerWebsite = cfg.footer_website || '';
 
@@ -184,9 +186,15 @@ class PDFGenerator {
     const footerAddressHtml = footerAddress
       ? `<div class="footer-line">${this._esc(footerAddress)}</div>`
       : '';
+    const phoneParts = [];
+    if (footerPhone) phoneParts.push(`<strong>T:</strong> ${this._esc(footerPhone)}`);
+    if (footerFax) phoneParts.push(`<strong>F:</strong> ${this._esc(footerFax)}`);
+    const footerPhoneHtml = phoneParts.length > 0
+      ? `<div class="footer-line">${phoneParts.join(' | ')}</div>`
+      : '';
     const contactParts = [];
-    if (footerEmail) contactParts.push(`E: ${this._esc(footerEmail)}`);
-    if (footerWebsite) contactParts.push(`W: ${this._esc(footerWebsite)}`);
+    if (footerEmail) contactParts.push(`<strong>E:</strong> ${this._esc(footerEmail)}`);
+    if (footerWebsite) contactParts.push(`<strong>W:</strong> ${this._esc(footerWebsite)}`);
     const footerContactHtml = contactParts.length > 0
       ? `<div class="footer-line">${contactParts.join(' | ')}</div>`
       : '';
@@ -418,6 +426,7 @@ body {
       <span class="footer-abn">ABN: 42 148 020 526</span>
     </div>
     ${footerAddressHtml}
+    ${footerPhoneHtml}
     ${footerContactHtml}
   </div>
 </div>

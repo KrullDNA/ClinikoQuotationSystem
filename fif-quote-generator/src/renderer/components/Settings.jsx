@@ -142,6 +142,8 @@ export default function Settings({ onBack, isFirstTime }) {
 
   // Footer / Company Details
   const [footerAddress, setFooterAddress] = useState('');
+  const [footerPhone, setFooterPhone] = useState('');
+  const [footerFax, setFooterFax] = useState('');
   const [footerEmail, setFooterEmail] = useState('');
   const [footerWebsite, setFooterWebsite] = useState('');
 
@@ -174,6 +176,8 @@ export default function Settings({ onBack, isFirstTime }) {
         setDefaultValidity(cfg.default_validity || '30 days');
         setDefaultTerms(cfg.default_terms || '');
         setFooterAddress(cfg.footer_address || '');
+        setFooterPhone(cfg.footer_phone || '');
+        setFooterFax(cfg.footer_fax || '');
         setFooterEmail(cfg.footer_email || '');
         setFooterWebsite(cfg.footer_website || '');
       }
@@ -286,6 +290,8 @@ export default function Settings({ onBack, isFirstTime }) {
         default_validity: defaultValidity,
         default_terms: defaultTerms,
         footer_address: footerAddress,
+        footer_phone: footerPhone,
+        footer_fax: footerFax,
         footer_email: footerEmail,
         footer_website: footerWebsite
       });
@@ -552,6 +558,31 @@ export default function Settings({ onBack, isFirstTime }) {
               className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm
                          focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
             />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Telephone</label>
+              <input
+                type="text"
+                value={footerPhone}
+                onChange={(e) => setFooterPhone(e.target.value)}
+                placeholder="e.g. (02) 8964 1874"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm
+                           focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Fax</label>
+              <input
+                type="text"
+                value={footerFax}
+                onChange={(e) => setFooterFax(e.target.value)}
+                placeholder="e.g. (02) 8068 9716"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm
+                           focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
