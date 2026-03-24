@@ -4,8 +4,8 @@
 |---------|--------------------------------------|----------------|------------|
 | 1       | Project Scaffolding + Security Arch  | **Complete**   | No deviations. |
 | 2       | Settings + PIN Authentication        | **Complete**   | No deviations. |
-| 3       | Patient Lookup + Display             | Ready to Start | — |
-| 4       | Line Items Table                     | Not Started    | — |
+| 3       | Patient Lookup + Display             | **Complete**   | No deviations. |
+| 4       | Line Items Table                     | Ready to Start | — |
 | 5       | PDF Generation                       | Not Started    | — |
 | 6       | Upload + Save + Print                | Not Started    | — |
 | 7       | Polish + Packaging + Testing         | Not Started    | — |
@@ -36,3 +36,24 @@
 - AppHeader with logo display and gear icon for settings access
 - Brand colours applied: Primary #2C3E50, Accent #2980B9
 - App state machine: loading → setup/pin → settings-first/main → settings
+
+## Session 3 Notes
+
+- PatientLookup component: reference number input, Enter key + button, loading spinner
+- Error states: no patient found (with ref number), API error, no API key configured
+- PatientDetails component: clean card layout with all standard fields
+- Empty/null fields automatically hidden (label + value row both removed)
+- Date of birth reformatted from YYYY-MM-DD to DD/MM/YYYY
+- Phone formatted with type in parentheses, handles empty array
+- Address formatted as multi-line block (skip empty lines)
+- Preferred name shown only when present AND different from first name
+- Invoice email shown only when present AND different from main email
+- Patient notes and invoice extra info shown in subtle info boxes
+- Custom fields parser utility (parsePatient.js):
+  - Matches "Funding Scheme" section → "Funding Schmes" field (exact typo match)
+  - Extracts selected radio option for funding type
+  - NDIS section only displayed when funding scheme is "NDIS"
+  - All NDIS fields: number, plan type, plan manager, support coordinator, plan dates
+- Clear Patient button purges all patient data from React state
+- Patient internal ID (for uploads) stored in state but never displayed
+- Main screen layout: lookup at top, patient card below, placeholder for line items
