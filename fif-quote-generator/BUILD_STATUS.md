@@ -6,8 +6,8 @@
 | 2       | Settings + PIN Authentication        | **Complete**   | No deviations. |
 | 3       | Patient Lookup + Display             | **Complete**   | No deviations. |
 | 4       | Line Items Table                     | **Complete**   | No deviations. |
-| 5       | PDF Generation                       | Ready to Start | — |
-| 6       | Upload + Save + Print                | Not Started    | — |
+| 5       | PDF Generation                       | **Complete**   | Used Electron printToPDF instead of puppeteer-core (see notes). |
+| 6       | Upload + Save + Print                | Ready to Start | — |
 | 7       | Polish + Packaging + Testing         | Not Started    | — |
 
 ## Session 1 Notes
@@ -84,3 +84,38 @@
 - Form validation: requires patient, at least one line item, and quote number
 - Generate Quote button assembles full quoteData object (wired in Session 5)
 - All amounts formatted as $X,XXX.XX using en-AU locale
+
+## Session 5 Notes
+
+- PDF engine: Electron's built-in printToPDF (BrowserWindow.webContents.printToPDF)
+  - Deviation: Used Electron's native Chromium via printToPDF instead of puppeteer-core.
+    puppeteer-core was installed but Electron's binary cannot be used as a standalone
+    Chromium for Puppeteer (it launches as an Electron app). Using printToPDF is cleaner
+    for an Electron app — zero extra dependencies, same Chromium rendering engine.
+- HTML/CSS template replicates the reference Quotation_design.pdf exactly:
+  - Header: logo top-left, "QUOTATION" top-right in large light grey text (30pt, #c0c0c0)
+  - Participant info: name + NDIS/funding on left, date + quotation # on right
+  - 6-column line items table with dark header (#2d2d2d), white rows, subtle borders
+  - Item column: item_code on first line, category/name bold on second line
+  - Description column: widest, editable text from form
+  - QTY centre-aligned, Unit Cost/GST/Total right-aligned, all $X,XXX.XX
+  - GST shows "$ -" when no GST, dollar amount when GST applies
+  - Totals row: validity text left, TOTAL AMOUNT right in bordered cell
+  - GST breakdown (Subtotal ex GST + GST rows) shown only when items have GST
+  - Footer: orange border-top, "FEET IN FOCUS | ABN: 42 148 020 526", address, phone, email
+- Font: Montserrat via Google Fonts link (wght 300-800), fallback Century Gothic/Arial
+- EMPTY FIELD RULE enforced: all conditional sections hidden when data absent
+  - No NDIS row if not NDIS or no number
+  - No Funding row if no funding scheme
+  - No notes section if empty
+  - No terms section if empty
+  - No footer address/contact lines if no business data
+- Preview window: separate BrowserWindow with toolbar buttons
+  - Upload to Cliniko, Save Local Copy, Print, Back to Edit
+  - PDF displayed via iframe with base64 data URL
+  - Separate preload-preview.js with minimal API surface
+  - Back to Edit closes preview, returns to form with data intact
+- Generate Quote flow: renderer validates → IPC to main → PDFGenerator renders HTML
+  in hidden BrowserWindow → printToPDF → save to temp dir → open preview window
+- Loading state: "Generating..." spinner on button while PDF is being created
+- QuoteBuilder passes generating prop to disable button during generation

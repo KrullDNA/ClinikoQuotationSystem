@@ -9,6 +9,7 @@ const clinikoAPI = new ClinikoAPI();
 const pdfGenerator = new PDFGenerator();
 
 let mainWindow;
+let previewWindow;
 
 // ─── In-memory data cache ────────────────────────────────────────────────────
 const dataCache = {
@@ -129,6 +130,87 @@ ipcMain.handle('generate-quote', async (_event, quoteData) => {
   try {
     const filePath = await pdfGenerator.generateQuote(quoteData);
     return { success: true, data: filePath };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Open preview window with generated PDF
+ipcMain.handle('open-preview', async (_event, pdfPath, quoteData) => {
+  try {
+    if (previewWindow && !previewWindow.isDestroyed()) {
+      previewWindow.close();
+    }
+
+    previewWindow = new BrowserWindow({
+      width: 900,
+      height: 750,
+      title: `Quote Preview — ${quoteData.quoteNumber || 'Quote'}`,
+      parent: mainWindow,
+      modal: false,
+      webPreferences: {
+        preload: path.join(__dirname, '..', 'preload-preview.js'),
+        nodeIntegration: false,
+        contextIsolation: true,
+        sandbox: true
+      },
+      icon: path.join(__dirname, '..', 'assets', 'icon.png')
+    });
+
+    previewWindow.setMenuBarVisibility(false);
+
+    // Store data for the preview window to retrieve
+    previewWindow._quotePreviewData = {
+      pdfPath,
+      quoteNumber: quoteData.quoteNumber,
+      date: quoteData.date,
+      patientId: quoteData.patient ? quoteData.patient.internalId : null
+    };
+
+    previewWindow.loadFile(path.join(__dirname, '..', 'renderer', 'preview.html'));
+
+    previewWindow.on('closed', () => {
+      previewWindow = null;
+    });
+
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Get preview data (called from preview window)
+ipcMain.handle('get-preview-data', async (event) => {
+  try {
+    // Find the BrowserWindow that sent this event
+    const win = BrowserWindow.fromWebContents(event.sender);
+    if (win && win._quotePreviewData) {
+      const data = win._quotePreviewData;
+      // Read PDF as base64 for embedding in viewer
+      const pdfBuffer = fs.readFileSync(data.pdfPath);
+      const pdfBase64 = pdfBuffer.toString('base64');
+      return {
+        success: true,
+        data: {
+          ...data,
+          pdfBase64
+        }
+      };
+    }
+    return { success: false, error: 'No preview data available.' };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Close preview window
+ipcMain.handle('close-preview', async (event) => {
+  try {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    if (win && !win.isDestroyed()) {
+      win.close();
+    }
+    return { success: true };
   } catch (error) {
     return { success: false, error: error.message };
   }

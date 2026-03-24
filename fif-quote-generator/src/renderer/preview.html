@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quote Preview</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f1f5f9;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .toolbar {
+      background: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toolbar-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid #e2e8f0;
+      background: #ffffff;
+      color: #475569;
+      transition: all 0.15s ease;
+    }
+    .btn:hover { background: #f8fafc; border-color: #cbd5e1; }
+    .btn:active { background: #f1f5f9; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-primary {
+      background: #2C3E50;
+      color: #ffffff;
+      border-color: #2C3E50;
+    }
+    .btn-primary:hover { background: #1a252f; border-color: #1a252f; }
+
+    .btn-back {
+      background: #f8fafc;
+      color: #64748b;
+    }
+    .btn-back:hover { background: #f1f5f9; color: #475569; }
+
+    .btn-icon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    .pdf-viewer {
+      flex: 1;
+      overflow: hidden;
+      padding: 0;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    .pdf-viewer iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .loading {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .loading-spinner {
+      width: 28px;
+      height: 28px;
+      border: 3px solid #e2e8f0;
+      border-top-color: #2C3E50;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-text {
+      font-size: 13px;
+      color: #94a3b8;
+    }
+
+    .status-msg {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      display: none;
+    }
+    .status-msg.success {
+      display: inline-block;
+      background: #f0fdf4;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+    .status-msg.error {
+      display: inline-block;
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <span class="toolbar-title" id="toolbar-title">Quote Preview</span>
+      <span class="status-msg" id="status-msg"></span>
+    </div>
+    <div class="toolbar-right">
+      <button class="btn btn-primary" id="btn-upload" title="Upload to Cliniko patient file">
+        <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+        </svg>
+        Upload to Cliniko
+      </button>
+      <button class="btn" id="btn-save" title="Save a local copy">
+        <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        Save Local Copy
+      </button>
+      <button class="btn" id="btn-print" title="Print this quote">
+        <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+        </svg>
+        Print
+      </button>
+      <button class="btn btn-back" id="btn-back" title="Return to editing">
+        <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M11 17l-5-5m0 0l5-5m-5 5h12"/>
+        </svg>
+        Back to Edit
+      </button>
+    </div>
+  </div>
+
+  <div class="loading" id="loading">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Loading preview...</div>
+  </div>
+
+  <div class="pdf-viewer" id="pdf-viewer" style="display:none;">
+    <iframe id="pdf-frame"></iframe>
+  </div>
+
+  <script>
+    let previewData = null;
+
+    async function init() {
+      try {
+        const result = await window.previewApi.getPreviewData();
+        if (!result.success) {
+          showStatus('Failed to load preview: ' + (result.error || 'Unknown error'), 'error');
+          return;
+        }
+        previewData = result.data;
+
+        // Update title
+        document.getElementById('toolbar-title').textContent =
+          'Quote Preview — ' + (previewData.quoteNumber || 'Quote');
+
+        // Embed PDF
+        const pdfFrame = document.getElementById('pdf-frame');
+        pdfFrame.src = 'data:application/pdf;base64,' + previewData.pdfBase64;
+
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('pdf-viewer').style.display = 'flex';
+
+        // Hide upload button if no patient
+        if (!previewData.patientId) {
+          document.getElementById('btn-upload').style.display = 'none';
+        }
+      } catch (err) {
+        showStatus('Error loading preview: ' + err.message, 'error');
+      }
+    }
+
+    function showStatus(msg, type) {
+      const el = document.getElementById('status-msg');
+      el.textContent = msg;
+      el.className = 'status-msg ' + type;
+      if (type === 'success') {
+        setTimeout(() => { el.className = 'status-msg'; }, 4000);
+      }
+    }
+
+    function setButtonLoading(btn, loading) {
+      btn.disabled = loading;
+    }
+
+    // Upload to Cliniko
+    document.getElementById('btn-upload').addEventListener('click', async () => {
+      if (!previewData || !previewData.patientId) return;
+      const btn = document.getElementById('btn-upload');
+      setButtonLoading(btn, true);
+      try {
+        const result = await window.previewApi.uploadToCliniko(
+          previewData.patientId,
+          previewData.pdfPath,
+          previewData.quoteNumber,
+          previewData.date
+        );
+        if (result.success) {
+          showStatus('Uploaded to Cliniko successfully', 'success');
+        } else {
+          showStatus('Upload failed: ' + (result.error || 'Unknown error'), 'error');
+        }
+      } catch (err) {
+        showStatus('Upload error: ' + err.message, 'error');
+      }
+      setButtonLoading(btn, false);
+    });
+
+    // Save local copy
+    document.getElementById('btn-save').addEventListener('click', async () => {
+      if (!previewData) return;
+      const btn = document.getElementById('btn-save');
+      setButtonLoading(btn, true);
+      try {
+        const result = await window.previewApi.saveLocalCopy(previewData.pdfPath);
+        if (result.success) {
+          showStatus('Saved to: ' + result.data, 'success');
+        } else if (result.error !== 'Save cancelled') {
+          showStatus('Save failed: ' + (result.error || 'Unknown error'), 'error');
+        }
+      } catch (err) {
+        showStatus('Save error: ' + err.message, 'error');
+      }
+      setButtonLoading(btn, false);
+    });
+
+    // Print
+    document.getElementById('btn-print').addEventListener('click', async () => {
+      if (!previewData) return;
+      const btn = document.getElementById('btn-print');
+      setButtonLoading(btn, true);
+      try {
+        await window.previewApi.printQuote(previewData.pdfPath);
+        showStatus('Print job sent', 'success');
+      } catch (err) {
+        showStatus('Print error: ' + err.message, 'error');
+      }
+      setButtonLoading(btn, false);
+    });
+
+    // Back to edit
+    document.getElementById('btn-back').addEventListener('click', async () => {
+      await window.previewApi.closePreview();
+    });
+
+    init();
+  </script>
+</body>
+</html>

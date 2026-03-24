@@ -101,10 +101,30 @@ function App() {
     setPatient(null);
   }
 
-  function handleGenerateQuote(quoteData) {
-    // Placeholder — will be implemented in Session 5
-    console.log('Generate quote:', quoteData);
-    alert('Quote generation will be implemented in Session 5.\n\nQuote data has been assembled successfully.');
+  const [generating, setGenerating] = useState(false);
+
+  async function handleGenerateQuote(quoteData) {
+    if (generating) return;
+    setGenerating(true);
+
+    try {
+      // Step 1: Generate PDF via main process
+      const result = await window.api.generateQuote(quoteData);
+      if (!result.success) {
+        alert('Failed to generate quote: ' + (result.error || 'Unknown error'));
+        setGenerating(false);
+        return;
+      }
+
+      const pdfPath = result.data;
+
+      // Step 2: Open preview window
+      await window.api.openPreview(pdfPath, quoteData);
+    } catch (err) {
+      alert('Error generating quote: ' + err.message);
+    }
+
+    setGenerating(false);
   }
 
   // Loading state
@@ -212,6 +232,7 @@ function App() {
             patient={patient}
             clinikoData={clinikoData}
             onGenerateQuote={handleGenerateQuote}
+            generating={generating}
           />
         </div>
       </main>

@@ -28,6 +28,10 @@ contextBridge.exposeInMainWorld('api', {
   generateQuote: (quoteData) =>
     ipcRenderer.invoke('generate-quote', quoteData),
 
+  // Open preview window
+  openPreview: (pdfPath, quoteData) =>
+    ipcRenderer.invoke('open-preview', pdfPath, quoteData),
+
   // Upload PDF to Cliniko patient file
   uploadToCliniko: (patientId, filePath, quoteNumber, date) =>
     ipcRenderer.invoke('upload-to-cliniko', patientId, filePath, quoteNumber, date),
