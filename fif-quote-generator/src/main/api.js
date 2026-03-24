@@ -149,6 +149,36 @@ class ClinikoAPI {
     }
   }
 
+  async testConnectionWithKey(apiKey, shard) {
+    try {
+      const baseURL = `https://api.${shard}.cliniko.com/v1/`;
+      const auth = Buffer.from(apiKey + ':').toString('base64');
+
+      const client = axios.create({
+        baseURL,
+        headers: {
+          'Authorization': `Basic ${auth}`,
+          'User-Agent': 'FIFQuoteGenerator (info@feetinfocus.com.au)',
+          'Accept': 'application/json'
+        },
+        timeout: 30000
+      });
+
+      const response = await client.get('businesses');
+      const businesses = response.data.businesses || [];
+      return { success: true, businesses };
+    } catch (error) {
+      if (error.response) {
+        const { status } = error.response;
+        if (status === 401) {
+          return { success: false, error: 'Invalid API key.' };
+        }
+        return { success: false, error: `API error: ${status}` };
+      }
+      return { success: false, error: 'Network error. Check your connection.' };
+    }
+  }
+
   async getPresignedPost() {
     return this._get('patient_attachments/presigned_post');
   }

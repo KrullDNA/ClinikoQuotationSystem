@@ -66,5 +66,24 @@ contextBridge.exposeInMainWorld('api', {
 
   // Test API connection
   testConnection: () =>
-    ipcRenderer.invoke('test-connection')
+    ipcRenderer.invoke('test-connection'),
+
+  // Test connection with specific key + shard (before saving)
+  testConnectionWithKey: (apiKey, shard) =>
+    ipcRenderer.invoke('test-connection-with-key', apiKey, shard),
+
+  // Check if PIN is configured (for first-time setup detection)
+  hasPin: () =>
+    ipcRenderer.invoke('has-pin'),
+
+  // Logo management
+  selectLogo: () =>
+    ipcRenderer.invoke('select-logo'),
+
+  getLogoData: () =>
+    ipcRenderer.invoke('get-logo-data'),
+
+  // Lockout status
+  getLockoutStatus: () =>
+    ipcRenderer.invoke('get-lockout-status')
 });

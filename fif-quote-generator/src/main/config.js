@@ -142,6 +142,19 @@ function getNextQuoteNumber() {
   return `${prefix}-${String(counter).padStart(5, '0')}`;
 }
 
+function getLockoutStatus() {
+  const s = getStore();
+  const lockoutUntil = s.get('lockout_until');
+  const failedAttempts = s.get('failed_pin_attempts');
+  const isLocked = lockoutUntil && Date.now() < lockoutUntil;
+  return {
+    isLocked,
+    lockoutUntil: isLocked ? lockoutUntil : null,
+    remainingMs: isLocked ? lockoutUntil - Date.now() : 0,
+    failedAttempts
+  };
+}
+
 module.exports = {
   getConfig,
   saveConfig,
@@ -153,5 +166,6 @@ module.exports = {
   verifyPin,
   updatePin,
   hasPinConfigured,
+  getLockoutStatus,
   getNextQuoteNumber
 };

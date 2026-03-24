@@ -1,5 +1,6 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
+const fs = require('fs');
 const config = require('./config');
 const { ClinikoAPI } = require('./api');
 const { PDFGenerator } = require('./pdf');
@@ -256,6 +257,78 @@ ipcMain.handle('test-connection', async () => {
   try {
     const result = await clinikoAPI.testConnection();
     return result;
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Test connection with a specific key + shard (before saving)
+ipcMain.handle('test-connection-with-key', async (_event, apiKey, shard) => {
+  try {
+    const result = await clinikoAPI.testConnectionWithKey(apiKey, shard);
+    return result;
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Check if PIN is configured
+ipcMain.handle('has-pin', async () => {
+  try {
+    return { success: true, data: config.hasPinConfigured() };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Logo selection — open file dialog, copy to userData, return path
+ipcMain.handle('select-logo', async () => {
+  try {
+    const result = await dialog.showOpenDialog(mainWindow, {
+      title: 'Select Logo Image',
+      filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg'] }],
+      properties: ['openFile']
+    });
+
+    if (result.canceled || result.filePaths.length === 0) {
+      return { success: false, error: 'Selection cancelled' };
+    }
+
+    const sourcePath = result.filePaths[0];
+    const ext = path.extname(sourcePath);
+    const destDir = app.getPath('userData');
+    const destPath = path.join(destDir, `logo${ext}`);
+
+    fs.copyFileSync(sourcePath, destPath);
+    config.saveConfig({ logo_path: destPath });
+
+    return { success: true, data: destPath };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Get logo as data URL for display in renderer
+ipcMain.handle('get-logo-data', async () => {
+  try {
+    const logoPath = config.getConfig().logo_path;
+    if (!logoPath || !fs.existsSync(logoPath)) {
+      return { success: true, data: null };
+    }
+    const data = fs.readFileSync(logoPath);
+    const ext = path.extname(logoPath).replace('.', '');
+    const mime = ext === 'png' ? 'image/png' : 'image/jpeg';
+    const dataUrl = `data:${mime};base64,${data.toString('base64')}`;
+    return { success: true, data: dataUrl };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Get lockout status
+ipcMain.handle('get-lockout-status', async () => {
+  try {
+    return { success: true, data: config.getLockoutStatus() };
   } catch (error) {
     return { success: false, error: error.message };
   }
