@@ -21807,6 +21807,8 @@
         const logoResult = await window.api.getLogoData();
         if (logoResult.success && logoResult.data) {
           setLogoData(logoResult.data);
+        } else {
+          setLogoData(null);
         }
       } catch (err) {
       }
@@ -22032,7 +22034,17 @@
         placeholder: "e.g. 30 days",
         className: "w-full px-3 py-2 border border-slate-300 rounded-lg text-sm\n                         focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
       }
-    )), /* @__PURE__ */ import_react3.default.createElement("div", { className: "mb-4" }, /* @__PURE__ */ import_react3.default.createElement("label", { className: "block text-sm font-medium text-slate-700 mb-1" }, "Logo"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center space-x-4" }, logoData ? /* @__PURE__ */ import_react3.default.createElement("img", { src: logoData, alt: "Current logo", className: "h-16 w-auto object-contain border border-slate-200 rounded-lg p-1" }) : /* @__PURE__ */ import_react3.default.createElement("div", { className: "h-16 w-24 bg-slate-100 border border-slate-200 rounded-lg flex items-center justify-center" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "text-xs text-slate-400" }, "No logo")), /* @__PURE__ */ import_react3.default.createElement(
+    )), /* @__PURE__ */ import_react3.default.createElement("div", { className: "mb-4" }, /* @__PURE__ */ import_react3.default.createElement("label", { className: "block text-sm font-medium text-slate-700 mb-1" }, "Logo"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center space-x-4" }, logoData ? /* @__PURE__ */ import_react3.default.createElement(
+      "img",
+      {
+        src: logoData,
+        alt: "Current logo",
+        className: "h-16 w-auto object-contain border border-slate-200 rounded-lg p-1",
+        onError: (e) => {
+          e.target.style.display = "none";
+        }
+      }
+    ) : /* @__PURE__ */ import_react3.default.createElement("div", { className: "h-16 w-24 bg-slate-100 border border-slate-200 rounded-lg flex items-center justify-center" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "text-xs text-slate-400" }, "No logo")), /* @__PURE__ */ import_react3.default.createElement(
       "button",
       {
         onClick: handleSelectLogo,
@@ -22137,7 +22149,17 @@
   // src/renderer/components/AppHeader.jsx
   var import_react4 = __toESM(require_react());
   function AppHeader({ onSettingsClick, logoData }) {
-    return /* @__PURE__ */ import_react4.default.createElement("header", { className: "bg-white border-b border-slate-200 px-6 py-3 flex-shrink-0" }, /* @__PURE__ */ import_react4.default.createElement("div", { className: "flex items-center justify-between max-w-6xl mx-auto" }, /* @__PURE__ */ import_react4.default.createElement("div", { className: "flex items-center space-x-3" }, logoData ? /* @__PURE__ */ import_react4.default.createElement("img", { src: logoData, alt: "Logo", className: "h-10 w-auto object-contain" }) : /* @__PURE__ */ import_react4.default.createElement("div", { className: "w-10 h-10 bg-brand-700 rounded-lg flex items-center justify-center" }, /* @__PURE__ */ import_react4.default.createElement("span", { className: "text-white font-bold text-sm" }, "FIF")), /* @__PURE__ */ import_react4.default.createElement("div", null, /* @__PURE__ */ import_react4.default.createElement("h1", { className: "text-lg font-semibold text-slate-800" }, "FIF Quote Generator"), /* @__PURE__ */ import_react4.default.createElement("p", { className: "text-xs text-slate-400" }, "Feet in Focus"))), /* @__PURE__ */ import_react4.default.createElement(
+    return /* @__PURE__ */ import_react4.default.createElement("header", { className: "bg-white border-b border-slate-200 px-6 py-3 flex-shrink-0" }, /* @__PURE__ */ import_react4.default.createElement("div", { className: "flex items-center justify-between max-w-6xl mx-auto" }, /* @__PURE__ */ import_react4.default.createElement("div", { className: "flex items-center space-x-3" }, logoData ? /* @__PURE__ */ import_react4.default.createElement(
+      "img",
+      {
+        src: logoData,
+        alt: "Logo",
+        className: "h-10 w-auto object-contain",
+        onError: (e) => {
+          e.target.style.display = "none";
+        }
+      }
+    ) : /* @__PURE__ */ import_react4.default.createElement("div", { className: "w-10 h-10 bg-brand-700 rounded-lg flex items-center justify-center" }, /* @__PURE__ */ import_react4.default.createElement("span", { className: "text-white font-bold text-sm" }, "FIF")), /* @__PURE__ */ import_react4.default.createElement("div", null, /* @__PURE__ */ import_react4.default.createElement("h1", { className: "text-lg font-semibold text-slate-800" }, "FIF Quote Generator"), /* @__PURE__ */ import_react4.default.createElement("p", { className: "text-xs text-slate-400" }, "Feet in Focus"))), /* @__PURE__ */ import_react4.default.createElement(
       "button",
       {
         onClick: onSettingsClick,
@@ -23042,8 +23064,11 @@ ${error.stack || ""}`);
         const result = await window.api.getLogoData();
         if (result.success && result.data) {
           setLogoData(result.data);
+        } else {
+          setLogoData(null);
         }
       } catch (err) {
+        setLogoData(null);
       }
     }
     async function loadClinikoData() {

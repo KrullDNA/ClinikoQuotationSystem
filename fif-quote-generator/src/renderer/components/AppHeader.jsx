@@ -6,7 +6,12 @@ export default function AppHeader({ onSettingsClick, logoData }) {
       <div className="flex items-center justify-between max-w-6xl mx-auto">
         <div className="flex items-center space-x-3">
           {logoData ? (
-            <img src={logoData} alt="Logo" className="h-10 w-auto object-contain" />
+            <img
+              src={logoData}
+              alt="Logo"
+              className="h-10 w-auto object-contain"
+              onError={(e) => { e.target.style.display = 'none'; }}
+            />
           ) : (
             <div className="w-10 h-10 bg-brand-700 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">FIF</span>

@@ -190,6 +190,8 @@ export default function Settings({ onBack, isFirstTime }) {
       const logoResult = await window.api.getLogoData();
       if (logoResult.success && logoResult.data) {
         setLogoData(logoResult.data);
+      } else {
+        setLogoData(null);
       }
     } catch (err) {
       // Silently handle load errors
@@ -513,7 +515,12 @@ export default function Settings({ onBack, isFirstTime }) {
             <label className="block text-sm font-medium text-slate-700 mb-1">Logo</label>
             <div className="flex items-center space-x-4">
               {logoData ? (
-                <img src={logoData} alt="Current logo" className="h-16 w-auto object-contain border border-slate-200 rounded-lg p-1" />
+                <img
+                  src={logoData}
+                  alt="Current logo"
+                  className="h-16 w-auto object-contain border border-slate-200 rounded-lg p-1"
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
               ) : (
                 <div className="h-16 w-24 bg-slate-100 border border-slate-200 rounded-lg flex items-center justify-center">
                   <span className="text-xs text-slate-400">No logo</span>
