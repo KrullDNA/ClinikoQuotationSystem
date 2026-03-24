@@ -439,8 +439,9 @@ body {
       const logoPath = config.getConfig().logo_path;
       if (!logoPath || !fs.existsSync(logoPath)) return '';
       const data = fs.readFileSync(logoPath);
-      const ext = path.extname(logoPath).replace('.', '');
-      const mime = ext === 'png' ? 'image/png' : 'image/jpeg';
+      const ext = path.extname(logoPath).replace('.', '').toLowerCase();
+      const mimeMap = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', svg: 'image/svg+xml' };
+      const mime = mimeMap[ext] || 'image/png';
       return `data:${mime};base64,${data.toString('base64')}`;
     } catch (e) {
       return '';
