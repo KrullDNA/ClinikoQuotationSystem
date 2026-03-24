@@ -16,6 +16,10 @@
   "author": "Feet in Focus <info@feetinfocus.com.au>",
   "license": "UNLICENSED",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KrullDNA/ClinikoQuotationSystem.git"
+  },
   "devDependencies": {
     "concurrently": "^9.1.2",
     "electron": "^33.3.1",
