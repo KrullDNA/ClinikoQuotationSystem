@@ -94,9 +94,11 @@ function App() {
       const result = await window.api.getLogoData();
       if (result.success && result.data) {
         setLogoData(result.data);
+      } else {
+        setLogoData(null);
       }
     } catch (err) {
-      // Silently ignore
+      setLogoData(null);
     }
   }
 
