@@ -47,7 +47,7 @@ class PDFGenerator {
 
       // Save to temp directory
       const safeQuoteNum = (quoteData.quoteNumber || 'quote').replace(/[^a-zA-Z0-9_-]/g, '_');
-      const outputPath = path.join(os.tmpdir(), `Quotation_${safeQuoteNum}.pdf`);
+      const outputPath = path.join(os.tmpdir(), `Quote ${safeQuoteNum}.pdf`);
       fs.writeFileSync(outputPath, pdfBuffer);
 
       return outputPath;
