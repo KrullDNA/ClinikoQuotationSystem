@@ -387,7 +387,7 @@
       if (!previewData) return;
       const shard = previewData.shard || 'au1';
       const patientId = previewData.patientId;
-      const url = 'https://app.' + shard + '.cliniko.com/patients/' + patientId;
+      const url = 'https://' + shard + '.cliniko.com/patients/' + patientId;
       await window.previewApi.openExternal(url);
     });
 
