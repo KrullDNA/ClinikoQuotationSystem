@@ -212,7 +212,8 @@ ipcMain.handle('open-preview', async (_event, pdfPath, quoteData) => {
       patientId: quoteData.patient ? quoteData.patient.id : null,
       patientName: quoteData.patient ? quoteData.patient.fullName : '',
       patientLastName: quoteData.patient ? (quoteData.patient.fullName || '').split(' ').pop() : '',
-      shard: config.getShard()
+      shard: config.getShard(),
+      clinikoSubdomain: config.getConfig().cliniko_subdomain || ''
     };
 
     previewWindow.loadFile(path.join(__dirname, '..', 'renderer', 'preview.html'));
