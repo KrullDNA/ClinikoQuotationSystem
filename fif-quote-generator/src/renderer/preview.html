@@ -385,8 +385,14 @@
 
     document.getElementById('btn-view-cliniko').addEventListener('click', async () => {
       if (!previewData) return;
+      const subdomain = previewData.clinikoSubdomain;
+      const shard = previewData.shard || 'au1';
       const patientId = previewData.patientId;
-      const url = 'https://app.cliniko.com/patients/' + patientId;
+      if (!subdomain) {
+        alert('Cliniko subdomain not configured. Go to Settings > Cliniko Connection and enter your subdomain.');
+        return;
+      }
+      const url = 'https://' + subdomain + '.' + shard + '.cliniko.com/patients/' + patientId;
       await window.previewApi.openExternal(url);
     });
 

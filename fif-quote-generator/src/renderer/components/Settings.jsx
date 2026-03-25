@@ -134,6 +134,7 @@ export default function Settings({ onBack, isFirstTime }) {
   const [connectionMessage, setConnectionMessage] = useState('');
   const [businesses, setBusinesses] = useState([]);
   const [selectedBusiness, setSelectedBusiness] = useState('');
+  const [clinikoSubdomain, setClinikoSubdomain] = useState('');
 
   // Quote Defaults
   const [defaultValidity, setDefaultValidity] = useState('30 days');
@@ -178,6 +179,7 @@ export default function Settings({ onBack, isFirstTime }) {
         const cfg = configResult.data;
         setShard(cfg.shard || 'au1');
         setSelectedBusiness(cfg.default_business_id || '');
+        setClinikoSubdomain(cfg.cliniko_subdomain || '');
         setDefaultValidity(cfg.default_validity || '30 days');
         setDefaultTerms(cfg.default_terms || '');
         setFooterAddress(cfg.footer_address || '');
@@ -305,6 +307,7 @@ export default function Settings({ onBack, isFirstTime }) {
       // Save config
       await window.api.saveConfig({
         shard,
+        cliniko_subdomain: clinikoSubdomain,
         default_business_id: selectedBusiness,
         default_validity: defaultValidity,
         default_terms: defaultTerms,
@@ -490,6 +493,25 @@ export default function Settings({ onBack, isFirstTime }) {
                 {connectionMessage}
               </div>
             )}
+          </div>
+
+          {/* Account subdomain */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-slate-700 mb-1">Account Subdomain</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={clinikoSubdomain}
+                onChange={(e) => setClinikoSubdomain(e.target.value.trim().toLowerCase())}
+                placeholder="e.g. feetinfocus"
+                className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm
+                           focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+              />
+              <span className="text-sm text-slate-400 whitespace-nowrap">.{shard}.cliniko.com</span>
+            </div>
+            <p className="text-xs text-slate-400 mt-1">
+              Your Cliniko account subdomain — check your browser URL bar when logged in to Cliniko
+            </p>
           </div>
 
           {/* Business dropdown */}

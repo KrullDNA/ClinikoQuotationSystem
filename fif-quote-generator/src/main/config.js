@@ -31,7 +31,8 @@ function getStore() {
         failed_pin_attempts: 0,
         quote_counter: 0,
         quote_prefix: 'FIF',
-        quote_suffix: ''
+        quote_suffix: '',
+        cliniko_subdomain: ''
       }
     });
   }
@@ -53,7 +54,8 @@ function getConfig() {
     footer_website: s.get('footer_website'),
     quote_counter: s.get('quote_counter'),
     quote_prefix: s.get('quote_prefix'),
-    quote_suffix: s.get('quote_suffix')
+    quote_suffix: s.get('quote_suffix'),
+    cliniko_subdomain: s.get('cliniko_subdomain')
   };
 }
 
@@ -62,7 +64,7 @@ function saveConfig(config) {
   const allowedKeys = [
     'shard', 'default_business_id', 'default_terms',
     'default_validity', 'logo_path', 'quote_prefix', 'quote_suffix',
-    'footer_address', 'footer_phone', 'footer_fax',
+    'cliniko_subdomain', 'footer_address', 'footer_phone', 'footer_fax',
     'footer_email', 'footer_website'
   ];
   for (const key of allowedKeys) {
