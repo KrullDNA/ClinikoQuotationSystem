@@ -44,6 +44,16 @@ contextBridge.exposeInMainWorld('api', {
   printQuote: (filePath) =>
     ipcRenderer.invoke('print-quote', filePath),
 
+  // Quote numbering
+  getNextQuoteNumber: () =>
+    ipcRenderer.invoke('get-next-quote-number'),
+
+  peekNextQuoteNumber: () =>
+    ipcRenderer.invoke('peek-next-quote-number'),
+
+  setQuoteCounter: (value) =>
+    ipcRenderer.invoke('set-quote-counter', value),
+
   // Config (non-sensitive only)
   getConfig: () =>
     ipcRenderer.invoke('get-config'),

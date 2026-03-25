@@ -140,6 +140,11 @@ export default function Settings({ onBack, isFirstTime }) {
   const [defaultTerms, setDefaultTerms] = useState('');
   const [logoData, setLogoData] = useState(null);
 
+  // Quote Numbering
+  const [nextQuoteNumber, setNextQuoteNumber] = useState('');
+  const [quoteSuffix, setQuoteSuffix] = useState('');
+  const [quoteNumberPreview, setQuoteNumberPreview] = useState('');
+
   // Footer / Company Details
   const [footerAddress, setFooterAddress] = useState('');
   const [footerPhone, setFooterPhone] = useState('');
@@ -180,6 +185,10 @@ export default function Settings({ onBack, isFirstTime }) {
         setFooterFax(cfg.footer_fax || '');
         setFooterEmail(cfg.footer_email || '');
         setFooterWebsite(cfg.footer_website || '');
+        setQuoteSuffix(cfg.quote_suffix || '');
+        const nextNum = (cfg.quote_counter || 0) + 1;
+        setNextQuoteNumber(String(nextNum));
+        setQuoteNumberPreview(`${nextNum}${cfg.quote_suffix || ''}`);
       }
 
       const hasKey = await window.api.hasApiKey();
@@ -285,12 +294,21 @@ export default function Settings({ onBack, isFirstTime }) {
         await window.api.saveApiKey(apiKey);
       }
 
+      // Save quote counter if changed
+      if (nextQuoteNumber) {
+        const num = parseInt(nextQuoteNumber, 10);
+        if (!isNaN(num) && num > 0) {
+          await window.api.setQuoteCounter(num);
+        }
+      }
+
       // Save config
       await window.api.saveConfig({
         shard,
         default_business_id: selectedBusiness,
         default_validity: defaultValidity,
         default_terms: defaultTerms,
+        quote_suffix: quoteSuffix,
         footer_address: footerAddress,
         footer_phone: footerPhone,
         footer_fax: footerFax,
@@ -498,6 +516,55 @@ export default function Settings({ onBack, isFirstTime }) {
         {/* Quote Defaults */}
         <section className="bg-white rounded-xl border border-slate-200 p-6 mb-6">
           <h3 className="text-base font-semibold text-slate-800 mb-4">Quote Defaults</h3>
+
+          {/* Quote Numbering */}
+          <div className="mb-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
+            <h4 className="text-sm font-semibold text-slate-700 mb-3">Quote Numbering</h4>
+            <div className="grid grid-cols-2 gap-4 mb-3">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Next Quote Number</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={nextQuoteNumber}
+                  onChange={(e) => {
+                    setNextQuoteNumber(e.target.value);
+                    const num = parseInt(e.target.value, 10);
+                    if (!isNaN(num) && num > 0) {
+                      setQuoteNumberPreview(`${num}${quoteSuffix}`);
+                    }
+                  }}
+                  placeholder="e.g. 1001"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm
+                             focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                />
+                <p className="text-xs text-slate-400 mt-1">Override to reset the sequential counter</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Suffix</label>
+                <input
+                  type="text"
+                  value={quoteSuffix}
+                  onChange={(e) => {
+                    setQuoteSuffix(e.target.value);
+                    const num = parseInt(nextQuoteNumber, 10);
+                    if (!isNaN(num) && num > 0) {
+                      setQuoteNumberPreview(`${num}${e.target.value}`);
+                    }
+                  }}
+                  placeholder="e.g. -FIF"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm
+                             focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                />
+                <p className="text-xs text-slate-400 mt-1">Appended after the number (no spaces)</p>
+              </div>
+            </div>
+            {quoteNumberPreview && (
+              <div className="text-sm text-slate-600">
+                Preview: <span className="font-mono font-semibold text-slate-800">{quoteNumberPreview}</span>
+              </div>
+            )}
+          </div>
 
           <div className="mb-4">
             <label className="block text-sm font-medium text-slate-700 mb-1">Default Quote Validity</label>

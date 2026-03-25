@@ -30,7 +30,8 @@ function getStore() {
         lockout_until: 0,
         failed_pin_attempts: 0,
         quote_counter: 0,
-        quote_prefix: 'FIF'
+        quote_prefix: 'FIF',
+        quote_suffix: ''
       }
     });
   }
@@ -51,7 +52,8 @@ function getConfig() {
     footer_email: s.get('footer_email'),
     footer_website: s.get('footer_website'),
     quote_counter: s.get('quote_counter'),
-    quote_prefix: s.get('quote_prefix')
+    quote_prefix: s.get('quote_prefix'),
+    quote_suffix: s.get('quote_suffix')
   };
 }
 
@@ -59,7 +61,7 @@ function saveConfig(config) {
   const s = getStore();
   const allowedKeys = [
     'shard', 'default_business_id', 'default_terms',
-    'default_validity', 'logo_path', 'quote_prefix',
+    'default_validity', 'logo_path', 'quote_prefix', 'quote_suffix',
     'footer_address', 'footer_phone', 'footer_fax',
     'footer_email', 'footer_website'
   ];
@@ -150,8 +152,25 @@ function getNextQuoteNumber() {
   const s = getStore();
   const counter = s.get('quote_counter') + 1;
   s.set('quote_counter', counter);
-  const prefix = s.get('quote_prefix') || 'FIF';
-  return `${prefix}-${String(counter).padStart(5, '0')}`;
+  const suffix = s.get('quote_suffix') || '';
+  return `${counter}${suffix}`;
+}
+
+function peekNextQuoteNumber() {
+  const s = getStore();
+  const counter = s.get('quote_counter') + 1;
+  const suffix = s.get('quote_suffix') || '';
+  return `${counter}${suffix}`;
+}
+
+function setQuoteCounter(value) {
+  const s = getStore();
+  const num = parseInt(value, 10);
+  if (isNaN(num) || num < 0) {
+    throw new Error('Quote counter must be a non-negative number.');
+  }
+  // Set to value - 1 so the next call to getNextQuoteNumber returns `value`
+  s.set('quote_counter', num - 1);
 }
 
 function getLockoutStatus() {
@@ -179,5 +198,7 @@ module.exports = {
   updatePin,
   hasPinConfigured,
   getLockoutStatus,
-  getNextQuoteNumber
+  getNextQuoteNumber,
+  peekNextQuoteNumber,
+  setQuoteCounter
 };

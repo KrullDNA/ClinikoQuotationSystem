@@ -390,6 +390,32 @@ ipcMain.handle('print-quote', async (_event, filePath) => {
   }
 });
 
+// Quote numbering
+ipcMain.handle('get-next-quote-number', async () => {
+  try {
+    return { success: true, data: config.getNextQuoteNumber() };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('peek-next-quote-number', async () => {
+  try {
+    return { success: true, data: config.peekNextQuoteNumber() };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('set-quote-counter', async (_event, value) => {
+  try {
+    config.setQuoteCounter(value);
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
 // Config
 ipcMain.handle('get-config', async () => {
   try {
