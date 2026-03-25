@@ -41,6 +41,12 @@ export default function QuoteBuilder({
           setSelectedBusinessId(cfg.default_business_id);
         }
       }
+
+      // Auto-assign next sequential quote number
+      const numResult = await window.api.peekNextQuoteNumber();
+      if (numResult.success) {
+        setQuoteNumber(numResult.data);
+      }
     } catch (err) {
       // Use defaults
     }
@@ -106,7 +112,7 @@ export default function QuoteBuilder({
     });
   }
 
-  function handleGenerate() {
+  async function handleGenerate() {
     const errors = [];
     if (!patient) errors.push('Please look up a patient first.');
     if (lineItems.length === 0) errors.push('Please add at least one line item.');
@@ -118,6 +124,13 @@ export default function QuoteBuilder({
     }
 
     setValidationErrors([]);
+
+    // Consume the sequential number (increment counter)
+    try {
+      await window.api.getNextQuoteNumber();
+    } catch (err) {
+      // Continue even if counter increment fails
+    }
 
     // Calculate totals
     const totalAmount = lineItems.reduce((sum, item) => {
@@ -177,11 +190,10 @@ export default function QuoteBuilder({
             <input
               type="text"
               value={quoteNumber}
-              onChange={(e) => { setQuoteNumber(e.target.value); setValidationErrors([]); }}
-              placeholder="e.g. 1110, FIF-0042"
+              readOnly
               className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm
-                         focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500
-                         placeholder:text-slate-400"
+                         bg-slate-50 text-slate-700 cursor-default
+                         focus:outline-none"
             />
           </div>
           <div>
