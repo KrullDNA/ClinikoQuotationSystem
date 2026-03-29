@@ -5,6 +5,9 @@ function DiagnosticsPanel() {
   const [running, setRunning] = useState(false);
   const [patientRef, setPatientRef] = useState('');
   const [showRefPrompt, setShowRefPrompt] = useState(false);
+  const [customFieldsDump, setCustomFieldsDump] = useState(null);
+  const [debugRef, setDebugRef] = useState('');
+  const [debugLoading, setDebugLoading] = useState(false);
 
   const tests = [
     { id: 'api', name: 'API Connection', run: () => window.api.diagApiConnection(), format: (d) => `${d.count} businesses found` },
@@ -113,6 +116,52 @@ function DiagnosticsPanel() {
           </tbody>
         </table>
       )}
+
+      {/* Debug Custom Fields */}
+      <div className="mt-4 pt-4 border-t border-slate-200">
+        <p className="text-xs font-medium text-slate-500 uppercase mb-2">Debug Custom Fields</p>
+        <div className="flex items-end gap-2 mb-2">
+          <div>
+            <label className="block text-xs text-slate-500 mb-1">Patient ref #</label>
+            <input
+              type="text"
+              value={debugRef}
+              onChange={(e) => setDebugRef(e.target.value)}
+              placeholder="e.g. 1628"
+              className="px-3 py-1.5 border border-slate-300 rounded-lg text-sm w-36
+                         focus:outline-none focus:ring-1 focus:ring-brand-500"
+            />
+          </div>
+          <button
+            onClick={async () => {
+              if (!debugRef) return;
+              setDebugLoading(true);
+              setCustomFieldsDump(null);
+              try {
+                const result = await window.api.diagPatientCustomFields(debugRef);
+                if (result.success) {
+                  setCustomFieldsDump(JSON.stringify(result.data.customFields, null, 2));
+                } else {
+                  setCustomFieldsDump('Error: ' + result.error);
+                }
+              } catch (err) {
+                setCustomFieldsDump('Error: ' + err.message);
+              }
+              setDebugLoading(false);
+            }}
+            disabled={debugLoading}
+            className="px-4 py-1.5 bg-slate-600 text-white rounded-lg text-sm font-medium
+                       hover:bg-slate-700 transition-colors disabled:opacity-50"
+          >
+            {debugLoading ? 'Loading...' : 'Dump Fields'}
+          </button>
+        </div>
+        {customFieldsDump && (
+          <pre className="bg-slate-900 text-green-400 text-xs p-3 rounded-lg overflow-auto max-h-64 whitespace-pre-wrap">
+            {customFieldsDump}
+          </pre>
+        )}
+      </div>
     </div>
   );
 }
