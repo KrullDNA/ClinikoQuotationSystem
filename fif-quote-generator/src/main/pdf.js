@@ -70,10 +70,10 @@ class PDFGenerator {
     // Funding label/value — EMPTY FIELD RULE: hide if no data
     let fundingLabel = '';
     let fundingValue = '';
-    if (patient.fundingScheme === 'NDIS' && patient.ndisNumber) {
+    if (patient.ndisNumber) {
       fundingLabel = 'NDIS Number';
       fundingValue = patient.ndisNumber;
-    } else if (patient.fundingScheme && patient.fundingScheme !== 'NDIS') {
+    } else if (patient.fundingScheme) {
       fundingLabel = 'Funding';
       fundingValue = patient.fundingScheme;
     }
