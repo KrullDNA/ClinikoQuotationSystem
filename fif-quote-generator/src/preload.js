@@ -128,6 +128,9 @@ contextBridge.exposeInMainWorld('api', {
   diagPatientLookup: (refNumber) =>
     ipcRenderer.invoke('diag-patient-lookup', refNumber),
 
+  diagPatientCustomFields: (refNumber) =>
+    ipcRenderer.invoke('diag-patient-custom-fields', refNumber),
+
   diagBillableItems: () =>
     ipcRenderer.invoke('diag-billable-items'),
 

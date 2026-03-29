@@ -661,6 +661,18 @@ ipcMain.handle('diag-patient-lookup', async (_event, refNumber) => {
   }
 });
 
+// Debug: return raw custom fields for a patient
+ipcMain.handle('diag-patient-custom-fields', async (_event, refNumber) => {
+  try {
+    const patient = await clinikoAPI.getPatient(refNumber);
+    if (!patient) return { success: false, error: 'Patient not found' };
+    const customFields = patient.custom_fields || null;
+    return { success: true, data: { customFields } };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
 // Run diagnostics: billable items count
 ipcMain.handle('diag-billable-items', async () => {
   try {
