@@ -3,14 +3,20 @@
  * Handles null-checks, custom fields, and formatting.
  */
 
+function normalize(str) {
+  return (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
 function findSection(customFields, sectionName) {
   if (!customFields || !customFields.sections) return null;
-  return customFields.sections.find(s => s.name === sectionName) || null;
+  const key = normalize(sectionName);
+  return customFields.sections.find(s => normalize(s.name) === key) || null;
 }
 
 function findField(section, fieldName) {
   if (!section || !section.fields) return null;
-  return section.fields.find(f => f.name === fieldName && !f.archived) || null;
+  const key = normalize(fieldName);
+  return section.fields.find(f => normalize(f.name) === key && !f.archived) || null;
 }
 
 function getSelectedOption(field) {
@@ -79,8 +85,9 @@ export function parsePatient(raw) {
 
   // Funding Scheme section
   const fundingSection = findSection(customFields, 'Funding Scheme');
-  // EXACT match with typo: "Funding Schmes"
-  const fundingTypeField = findField(fundingSection, 'Funding Schmes');
+  // Matches "Funding Schmes" (typo) or "Funding Schemes" (corrected)
+  const fundingTypeField = findField(fundingSection, 'Funding Schemes')
+    || findField(fundingSection, 'Funding Schmes');
   const fundingScheme = getSelectedOption(fundingTypeField);
   const additionalFundingField = findField(fundingSection, 'Additional Funding Information');
   const additionalFunding = getFieldValue(additionalFundingField);
